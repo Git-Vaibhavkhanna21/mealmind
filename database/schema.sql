@@ -1,0 +1,2 @@
+-- MealMind database schema (placeholder)
+-- TODO: define tables for pantry items, recipes, and shopping lists.
