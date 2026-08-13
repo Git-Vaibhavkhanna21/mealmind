@@ -9,6 +9,7 @@ type PantryItem = {
   unit: string | null;
   purchase_date: string;
   expiry_date: string | null;
+  is_depleted: boolean;
 };
 
 export function PantryClient({ initialItems }: { initialItems: PantryItem[] }) {
@@ -17,6 +18,12 @@ export function PantryClient({ initialItems }: { initialItems: PantryItem[] }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const [editingItemId, setEditingItemId] = useState<string | null>(null);
+  const [editQuantity, setEditQuantity] = useState("");
+  const [editIsDepleted, setEditIsDepleted] = useState(false);
+  const [isSavingEdit, setIsSavingEdit] = useState(false);
+  const [editError, setEditError] = useState<string | null>(null);
 
   async function submitFormData(formData: FormData) {
     setIsSubmitting(true);
@@ -54,6 +61,45 @@ export function PantryClient({ initialItems }: { initialItems: PantryItem[] }) {
     const formData = new FormData();
     formData.append("text", text);
     await submitFormData(formData);
+  }
+
+  function startEditing(item: PantryItem) {
+    setEditingItemId(item.id);
+    setEditQuantity(item.quantity === null ? "" : String(item.quantity));
+    setEditIsDepleted(item.is_depleted);
+    setEditError(null);
+  }
+
+  function cancelEditing() {
+    setEditingItemId(null);
+    setEditError(null);
+  }
+
+  async function saveEditing(itemId: string) {
+    setIsSavingEdit(true);
+    setEditError(null);
+    try {
+      const response = await fetch(`/api/pantry-items/${itemId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          quantity: editQuantity.trim() === "" ? null : Number(editQuantity),
+          is_depleted: editIsDepleted,
+        }),
+      });
+      const result = await response.json();
+      if (!response.ok) {
+        throw new Error(result.error ?? "Failed to update item");
+      }
+      setItems((current) =>
+        current.map((item) => (item.id === itemId ? (result.item as PantryItem) : item)),
+      );
+      setEditingItemId(null);
+    } catch (err) {
+      setEditError(err instanceof Error ? err.message : "Failed to update item");
+    } finally {
+      setIsSavingEdit(false);
+    }
   }
 
   return (
@@ -116,19 +162,79 @@ export function PantryClient({ initialItems }: { initialItems: PantryItem[] }) {
           </p>
         ) : (
           <ul className="flex flex-col divide-y divide-zinc-200 dark:divide-zinc-800">
-            {items.map((item) => (
-              <li key={item.id} className="flex items-center justify-between gap-4 py-3">
-                <div>
+            {items.map((item) =>
+              editingItemId === item.id ? (
+                <li key={item.id} className="flex flex-col gap-2 py-3">
                   <p className="font-medium capitalize">{item.name}</p>
-                  <p className="text-sm text-zinc-600 dark:text-zinc-400">
-                    {[item.quantity, item.unit].filter(Boolean).join(" ") || "—"}
-                  </p>
-                </div>
-                <p className="text-sm text-zinc-500 dark:text-zinc-500">
-                  {item.expiry_date ? `Expires ${item.expiry_date}` : "No expiry estimate"}
-                </p>
-              </li>
-            ))}
+                  <div className="flex flex-wrap items-center gap-4">
+                    <label className="flex items-center gap-2 text-sm">
+                      Quantity
+                      <input
+                        type="number"
+                        value={editQuantity}
+                        onChange={(event) => setEditQuantity(event.target.value)}
+                        className="w-24 rounded-lg border border-zinc-300 bg-white px-2 py-1 text-sm text-zinc-900 outline-none focus:border-zinc-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
+                      />
+                    </label>
+                    <label className="flex items-center gap-2 text-sm">
+                      <input
+                        type="checkbox"
+                        checked={editIsDepleted}
+                        onChange={(event) => setEditIsDepleted(event.target.checked)}
+                      />
+                      Depleted
+                    </label>
+                  </div>
+                  {editError && <p className="text-sm text-red-600 dark:text-red-400">{editError}</p>}
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => saveEditing(item.id)}
+                      disabled={isSavingEdit}
+                      className="rounded-full bg-zinc-900 px-3 py-1 text-xs font-medium text-white transition hover:bg-zinc-700 disabled:pointer-events-none disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
+                    >
+                      {isSavingEdit ? "Saving…" : "Save"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={cancelEditing}
+                      disabled={isSavingEdit}
+                      className="rounded-full border border-zinc-300 px-3 py-1 text-xs font-medium text-zinc-900 transition hover:bg-zinc-50 disabled:pointer-events-none disabled:opacity-50 dark:border-zinc-700 dark:text-zinc-100 dark:hover:bg-zinc-800"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </li>
+              ) : (
+                <li key={item.id} className="flex items-center justify-between gap-4 py-3">
+                  <div>
+                    <p className="font-medium capitalize">
+                      {item.name}
+                      {item.is_depleted && (
+                        <span className="ml-2 rounded-full bg-zinc-100 px-2 py-0.5 text-xs font-normal text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400">
+                          Depleted
+                        </span>
+                      )}
+                    </p>
+                    <p className="text-sm text-zinc-600 dark:text-zinc-400">
+                      {[item.quantity, item.unit].filter(Boolean).join(" ") || "—"}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <p className="text-sm text-zinc-500 dark:text-zinc-500">
+                      {item.expiry_date ? `Expires ${item.expiry_date}` : "No expiry estimate"}
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => startEditing(item)}
+                      className="rounded-full border border-zinc-300 px-3 py-1 text-xs font-medium text-zinc-900 transition hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-100 dark:hover:bg-zinc-800"
+                    >
+                      Edit
+                    </button>
+                  </div>
+                </li>
+              ),
+            )}
           </ul>
         )}
       </section>
