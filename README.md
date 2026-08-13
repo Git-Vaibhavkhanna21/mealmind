@@ -111,7 +111,7 @@ Five tables, all in Supabase Postgres:
 
 > Placeholder — setup instructions land alongside the Phase 1 implementation.
 
-Expected once filled in: prerequisites (Node, Supabase project, Anthropic API key), environment variables (`ANTHROPIC_API_KEY`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, TheMealDB config), install and run commands for `frontend/`, and how to apply `database/schema.sql`.
+Expected once filled in: prerequisites (Node, Supabase project, Anthropic API key), environment variables (`ANTHROPIC_API_KEY`, `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`, TheMealDB config), install and run commands for `frontend/`, and how to apply `database/schema.sql`.
 
 ## Roadmap
 

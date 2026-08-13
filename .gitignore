@@ -1,3 +1,12 @@
 # MCP server config (contains Supabase access token)
 .mcp.json
 .claude/
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# env files (can opt-in for committing if needed)
+.env
+!.env.example
