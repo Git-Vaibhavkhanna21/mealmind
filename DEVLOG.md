@@ -72,5 +72,15 @@ Claude Code reads this file automatically at the start of every session — conv
 ### Bugs found and fixed
 None.
 
+## PR #9 — Cook confirmation and pantry deduction
+### What was built
+`agents/pantry_deductor.py`: fuzzy-matches a recipe's ingredients against the user's pantry stock using Haiku, returning a deduction plan (`pantry_item_id`, `pantry_item_name`, `quantity_to_deduct`, `unit`, `confidence`) for review before anything is deducted. `apply_deduction` executes a confirmed plan — subtracts quantities, flips `is_depleted` when stock hits zero, and records the cook in `user_recipe_history` (`cooked_at`, `confirmed_cooked`). `app/api/confirm-cook/route.ts` exposes both steps behind one route: an unconfirmed request builds and returns the plan for review, a confirmed request (echoing the reviewed plan back) applies it. `/recipes` gained a "Cook This" button per card that opens a confirmation modal showing the deduction plan, with a confidence badge per match — amber below 70%, green at or above — and Confirm Cook / Cancel actions. `/pantry` gained a per-item Edit button opening an inline form to adjust quantity or toggle `is_depleted` manually, backed by a new `app/api/pantry-items/[id]/route.ts` PATCH route. `scripts/test_pantry_deduction.py` simulates cooking "Chickpea, chorizo & spinach stew" against the same seeded test pantry used elsewhere, asserting a high-confidence spinach match, a correct deduction, and a confirmed cook in history.
+
+### Architectural decisions
+Fuzzy ingredient matching ("fresh spinach" vs. a pantry item named "spinach") is a judgment call that benefits from a small, fast model — Haiku fits the same profile as the extraction work in `agents/parser.py`, one bounded call per confirmation rather than open-ended reasoning. Splitting the feature into a plan step (judgment, Haiku) and an apply step (deterministic arithmetic, no model call) keeps the model in the loop only where matching actually requires interpretation, and keeps the deduction itself auditable and re-runnable. The manual pantry edit endpoint is the one route in the app that talks to Supabase directly from Next.js rather than shelling out to Python — it's plain single-table CRUD scoped to the caller by RLS, with no model reasoning and no cross-agent sharing, so routing it through Python would add a subprocess hop for no benefit.
+
+### Bugs found and fixed
+None — `_extract_json_list`'s tolerant parsing (scan for `[...]` rather than assuming clean JSON) was carried over from `agents/meal_recommender.py` from the start, so the prose-prefixed-response failure mode that surfaced there didn't recur here.
+
 ## How this log is maintained
 CLAUDE.md instructs Claude Code to update this file at the end of every PR before the final commit. Each entry documents what was built, architectural decisions and reasoning, and bugs found and fixed. Written for a technical interviewer reading the public repository.
