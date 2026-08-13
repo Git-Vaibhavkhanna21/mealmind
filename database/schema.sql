@@ -1,2 +1,4 @@
--- MealMind database schema (placeholder)
--- TODO: define tables for pantry items, recipes, and shopping lists.
+-- MealMind database schema.
+-- See migrations/0001_init.sql for the initial tables, RLS policies, and
+-- pgvector setup. Apply migrations in order via the Supabase SQL Editor or
+-- `supabase db push`.
