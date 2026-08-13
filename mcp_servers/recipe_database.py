@@ -13,6 +13,7 @@ needs the same data without going through the MCP protocol.
 from __future__ import annotations
 
 import os
+import time
 from typing import Any
 
 import requests
@@ -24,11 +25,19 @@ THEMEALDB_BASE_URL = f"https://www.themealdb.com/api/json/v1/{THEMEALDB_API_KEY}
 
 _session = requests.Session()
 
+_MAX_RETRIES = 5
+_RETRY_BACKOFF_SECONDS = 2.0
+
 
 def _get(path: str, params: dict[str, str] | None = None) -> dict[str, Any]:
-    response = _session.get(f"{THEMEALDB_BASE_URL}/{path}", params=params, timeout=10)
-    response.raise_for_status()
-    return response.json()
+    for attempt in range(_MAX_RETRIES):
+        response = _session.get(f"{THEMEALDB_BASE_URL}/{path}", params=params, timeout=10)
+        if response.status_code == 429 and attempt < _MAX_RETRIES - 1:
+            time.sleep(_RETRY_BACKOFF_SECONDS * (2**attempt))
+            continue
+        response.raise_for_status()
+        return response.json()
+    raise AssertionError("unreachable")
 
 
 def normalize_recipe(raw: dict[str, Any]) -> dict[str, Any]:

@@ -5,7 +5,7 @@ each one with OpenAI's text-embedding-3-small (1536 dims, matching the
 `recipes.embedding vector(1536)` column), and upserts the rows into
 Supabase keyed on `themealdb_id` — safe to re-run.
 
-Requires OPENAI_API_KEY, SUPABASE_URL, and SUPABASE_SERVICE_ROLE_KEY (the
+Requires OPENAI_API_KEY, SUPABASE_URL, and SUPABASE_SERVICE_KEY (the
 service role key is required, not the anon key, since RLS on `recipes`
 only grants authenticated users read access — see
 database/migrations/0001_init.sql).
@@ -38,7 +38,7 @@ TARGET_RECIPE_COUNT = 200
 
 EMBEDDING_MODEL = "text-embedding-3-small"
 EMBEDDING_BATCH_SIZE = 50
-FETCH_WORKERS = 8
+FETCH_WORKERS = 4
 
 
 def require_env(name: str) -> str:
@@ -48,7 +48,7 @@ def require_env(name: str) -> str:
     return value
 
 
-def collect_meal_ids() -> list[str]:
+def collect_meal_ids(categories: list[str]) -> list[str]:
     """Spread ~TARGET_RECIPE_COUNT recipes across every TheMealDB category.
 
     Each category first contributes an even share; categories with fewer
@@ -56,7 +56,6 @@ def collect_meal_ids() -> list[str]:
     tops up from categories that still have unused recipes until the target
     is hit or the whole catalog is exhausted.
     """
-    categories = fetch_categories()
     summaries_by_category = {c: fetch_recipe_summaries_by_category(c) for c in categories}
     per_category = TARGET_RECIPE_COUNT // len(categories)
 
@@ -150,11 +149,12 @@ def upsert_recipes(
 def main() -> None:
     openai_client = OpenAI(api_key=require_env("OPENAI_API_KEY"))
     supabase = create_client(
-        require_env("SUPABASE_URL"), require_env("SUPABASE_SERVICE_ROLE_KEY")
+        require_env("SUPABASE_URL"), require_env("SUPABASE_SERVICE_KEY")
     )
 
-    print(f"Collecting up to {TARGET_RECIPE_COUNT} recipe ids across {len(CATEGORIES)} categories...")
-    meal_ids = collect_meal_ids()
+    categories = fetch_categories()
+    print(f"Collecting up to {TARGET_RECIPE_COUNT} recipe ids across {len(categories)} categories...")
+    meal_ids = collect_meal_ids(categories)
     print(f"Collected {len(meal_ids)} meal ids.")
 
     print("Fetching full recipe details...")
