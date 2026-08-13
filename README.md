@@ -22,7 +22,7 @@ Applying that principle to each piece of the pipeline:
 | `workflows/receipt_parsing.py` | Workflow | The steps (OCR → extract → validate → persist) never branch based on content — always run in this order, so there's no reason to spend a model call deciding "what's next." |
 | `agents/parser.py` | Agent | Receipt OCR output is unstructured and inconsistent — abbreviated item names, merged lines, store-specific formatting. Turning that into normalized `(name, quantity, unit, category)` records requires interpretation, not pattern matching. |
 | `workflows/expiration_workflow.py` | Workflow | Runs on a fixed schedule, fetches pantry state, calls the expiration agent, and branches to a fallback on failure — the branching condition (did the model call succeed?) is deterministic, not a judgment call. |
-| `agents/expiration.py` | Agent (with rule-based subagent fallback) | Estimating shelf life from a bare item name ("spinach," no purchase context) benefits from a model that knows typical spoilage patterns by category and storage condition. See fallback design below. |
+| `agents/expiration.py` | Agent (with Sonnet subagent fallback) | Estimating shelf life from a bare item name ("spinach," no purchase context) benefits from a model that knows typical spoilage patterns by category and storage condition. See fallback design below. |
 | `agents/meal_recommender.py` | Agent | Ranking retrieved recipes against pantry contents, expiring items, and user preferences is an open-ended judgment call — there's no fixed rule for "best meal to cook tonight." |
 | `agents/shopping_list.py` | Agent | Mostly set arithmetic (recipe ingredients minus pantry stock), but reconciling ingredient names across sources ("roma tomatoes" in the recipe vs. "tomatoes" in the pantry) needs fuzzy semantic matching rather than exact-string logic. |
 
@@ -34,7 +34,7 @@ Model choice follows task shape — volume and latency sensitivity on one axis, 
 |---|---|---|
 | Receipt parsing | Haiku | Runs once per receipt upload while the user is waiting; the extraction task is narrow and well-specified, so a fast, cheap model hits the accuracy bar without the latency cost of a larger one. |
 | Expiration estimation (primary) | Sonnet | Runs asynchronously in the background workflow, so latency matters less than judgment quality — estimating shelf life from limited context benefits from stronger reasoning. |
-| Expiration estimation (fallback) | None — deterministic rule table | See below. Guarantees the workflow always terminates with an answer, independent of model availability. |
+| Expiration estimation (fallback) | Sonnet | Runs only for the items Haiku flags low-confidence on, so the extra reasoning cost is spent selectively rather than on every item. See below. |
 | Meal recommendation | Sonnet (Opus as a future premium-tier option) | The highest-stakes reasoning step in the pipeline — synthesizes multiple RAG-retrieved candidates, pantry constraints, and (Phase 2) learned preferences into a ranked, explained recommendation. Runs once per session, so cost/latency headroom is available to spend on quality. |
 | Shopping list reconciliation | Haiku | The one non-deterministic sub-problem (fuzzy ingredient-name matching) is simple enough for a small model, and it can run at high volume cheaply. |
 
@@ -79,7 +79,7 @@ flowchart LR
     C --> D["Expiration Workflow\n(workflows/expiration_workflow.py)"]
     D -->|LLM estimate| E{Confident?}
     E -->|yes| F[Expiration Dates Written]
-    E -->|no / call fails| G["Rule-Based Subagent\n(deterministic shelf-life table)"]
+    E -->|no / low confidence| G["Sonnet Subagent\n(reasons through the single item)"]
     G --> F
     F --> H["Meal Recommendation Agent\n(agents/meal_recommender.py)"]
     H -->|RAG over recipes, pgvector| H
@@ -87,9 +87,9 @@ flowchart LR
     I --> J[Shopping List]
 ```
 
-1. **Receipt parsing workflow** (`workflows/receipt_parsing.py`) — Takes an uploaded receipt image, runs OCR, hands the raw text to `agents/parser.py` for extraction into normalized `(name, quantity, unit, category)` records, validates the result, and writes it to pantry inventory via the pantry MCP server. Deterministic sequence; the only reasoning step is delegated to the parser agent.
+1. **Receipt parsing workflow** (`workflows/receipt_parsing.py`) — Takes an uploaded receipt image, PDF, or plain text. Images are handed to `agents/parser.py` directly for Claude vision extraction; PDFs are text-extracted with `pdfplumber` first, since that step is deterministic and doesn't need a model call. Either way, `agents/parser.py` turns the content into normalized `(name, quantity, unit)` records, the workflow attaches today's date as `purchase_date`, hands the batch to the expiration workflow for `expiry_date` estimates, and writes the result to pantry inventory via the pantry MCP server. Deterministic sequence; the only reasoning steps are delegated to the parser and expiration agents.
 
-2. **Expiration workflow, with subagent fallback** (`workflows/expiration_workflow.py`) — Runs on a schedule (or after any pantry write), fetches current pantry state, and calls `agents/expiration.py` to estimate or refresh expiration dates. If that call fails, times out, or returns a low-confidence result, the workflow falls back to a deterministic rule-based subagent — a static shelf-life lookup by category — so the workflow always terminates with an answer rather than blocking on model availability. Items flagged as expiring soon trigger the meal recommendation agent.
+2. **Expiration workflow, with subagent fallback** (`workflows/expiration_workflow.py`) — After a receipt parse (or on a future schedule), estimates expiry dates for the pantry items via `agents/expiration.py`'s Haiku batch call. Any item that call flags low-confidence on is escalated to a Sonnet subagent — a slower, single-item call that reasons through the harder case individually — so the workflow always terminates with a best-effort date rather than leaving items unestimated. Items flagged as expiring soon trigger the meal recommendation agent.
 
 3. **Meal recommendation agent** (`agents/meal_recommender.py`) — Given pantry contents (weighted toward items nearing expiration), retrieves a shortlist of candidate recipes via the pgvector-backed RAG step described above, then reasons over that shortlist to produce a ranked, explained set of suggestions — factoring in what's expiring, user dietary settings, and (Phase 2) learned preferences.
 
