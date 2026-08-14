@@ -2,7 +2,7 @@
 
 ## Overview
 
-MealMind turns a photo of a grocery receipt into a running pantry inventory, then uses that inventory to recommend meals that prioritize ingredients close to expiring. It combines a deterministic parsing/tracking pipeline with LLM agents for the steps that require judgment — reading messy receipt text, estimating shelf life, and ranking recipes against what's actually in the kitchen. The end result is a shopping list that only contains what's missing for the meals the system suggests, closing the loop from "what did I buy" to "what should I cook" to "what do I need next."
+MealMind turns a photo of a grocery receipt into a running pantry inventory, then uses that inventory to recommend meals that prioritize ingredients close to expiring. It combines a deterministic parsing/tracking pipeline with LLM agents for the steps that require judgment — reading messy receipt text, estimating shelf life, and ranking recipes against what's actually in the kitchen. The end result is a shopping list generated from pantry state, cooking history, and preferences — replenishing what's running low, complementing what's already on hand, or re-enabling a dish the user has cooked before — closing the loop from "what did I buy" to "what should I cook" to "what do I need next."
 
 ## Architecture
 
@@ -24,7 +24,7 @@ Applying that principle to each piece of the pipeline:
 | `workflows/expiration_workflow.py` | Workflow | Runs on a fixed schedule, fetches pantry state, calls the expiration agent, and branches to a fallback on failure — the branching condition (did the model call succeed?) is deterministic, not a judgment call. |
 | `agents/expiration.py` | Agent (with Sonnet subagent fallback) | Estimating shelf life from a bare item name ("spinach," no purchase context) benefits from a model that knows typical spoilage patterns by category and storage condition. See fallback design below. |
 | `agents/meal_recommender.py` | Agent | Ranking retrieved recipes against pantry contents, expiring items, and user preferences is an open-ended judgment call — there's no fixed rule for "best meal to cook tonight." |
-| `agents/shopping_list.py` | Agent | Mostly set arithmetic (recipe ingredients minus pantry stock), but reconciling ingredient names across sources ("roma tomatoes" in the recipe vs. "tomatoes" in the pantry) needs fuzzy semantic matching rather than exact-string logic. |
+| `agents/shopping_list.py` | Agent | Deciding what to buy next weighs several open-ended signals at once — what's running low, what would round out pantry items already on hand into a full dish, what would re-enable a recipe cooked before — with no fixed rule for combining them, so the whole suggestion step is delegated to a model rather than just ingredient-name reconciliation. |
 
 ### Model selection
 
@@ -36,7 +36,7 @@ Model choice follows task shape — volume and latency sensitivity on one axis, 
 | Expiration estimation (primary) | Sonnet | Runs asynchronously in the background workflow, so latency matters less than judgment quality — estimating shelf life from limited context benefits from stronger reasoning. |
 | Expiration estimation (fallback) | Sonnet | Runs only for the items Haiku flags low-confidence on, so the extra reasoning cost is spent selectively rather than on every item. See below. |
 | Meal recommendation | Sonnet (Opus as a future premium-tier option) | The highest-stakes reasoning step in the pipeline — synthesizes multiple RAG-retrieved candidates, pantry constraints, and (Phase 2) learned preferences into a ranked, explained recommendation. Runs once per session, so cost/latency headroom is available to spend on quality. |
-| Shopping list reconciliation | Haiku | The one non-deterministic sub-problem (fuzzy ingredient-name matching) is simple enough for a small model, and it can run at high volume cheaply. |
+| Shopping list generation | Sonnet | Weighing pantry state, recent cook history, and preferences into ranked, justified suggestions is the same shape of open-ended reasoning as meal recommendation — runs once per (re)generation, not at high volume, so the latency/cost headroom is available. |
 
 ### Why MCP servers instead of direct API calls
 
@@ -93,7 +93,7 @@ flowchart LR
 
 3. **Meal recommendation agent** (`agents/meal_recommender.py`) — Given pantry contents (weighted toward items nearing expiration), retrieves a shortlist of candidate recipes via the pgvector-backed RAG step described above, then reasons over that shortlist to produce a ranked, explained set of suggestions — factoring in what's expiring, user dietary settings, and (Phase 2) learned preferences.
 
-4. **Shopping list agent** (`agents/shopping_list.py`) — Takes the recipes the user selects from the recommendations, diffs each recipe's ingredient list against current pantry stock, fuzzy-matches ingredient names across the two sources, aggregates quantities across recipes, and outputs the resulting shopping list.
+4. **Shopping list agent** (`agents/shopping_list.py`) — Reads current pantry state, the user's last 10 confirmed-cooked recipes (with ingredients), and their preferences, then asks Sonnet to suggest items that replenish what's running low, complement what's already on hand, or re-enable a dish cooked before — each with a one-sentence rationale. Regenerating replaces the unpurchased items from the previous list; anything already marked purchased is left alone as history.
 
 ## Database Schema
 
@@ -105,7 +105,7 @@ Five tables, all in Supabase Postgres:
 | `pantry_items` | The live inventory: item name, category, quantity, unit, purchase date, expiration date, and source (`receipt` vs. manually added). This is the table both the expiration workflow and the meal recommender read from. |
 | `receipts` | An audit trail of uploaded receipts — image reference, raw OCR text, parse status, and timestamps — decoupled from `pantry_items` so a parsing failure doesn't lose the source data. |
 | `recipes` | Cached recipe data pulled from TheMealDB via the recipe MCP server: title, ingredient list, instructions, dietary tags, prep time, and a `pgvector` embedding column used for RAG retrieval. |
-| `shopping_list_items` | Generated shopping list entries — aggregated ingredient, quantity, the recipe(s) that require it, and a checked/unchecked state. |
+| `shopping_list_items` | Generated shopping list entries — item name, quantity, unit, a one-sentence rationale for the suggestion, and a purchased/unpurchased state. |
 
 ## Getting Started
 
