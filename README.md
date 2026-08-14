@@ -113,6 +113,12 @@ Five tables, all in Supabase Postgres:
 
 Expected once filled in: prerequisites (Node, Supabase project, Anthropic API key), environment variables (`ANTHROPIC_API_KEY`, `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`, TheMealDB config), install and run commands for `frontend/`, and how to apply `database/schema.sql`.
 
+## Deployment
+
+**Live URL: [LIVE_URL]**
+
+The Next.js frontend deploys to Vercel from the `frontend/` directory; see [`DEPLOYMENT.md`](DEPLOYMENT.md) for the full setup — Vercel project configuration, required environment variables, Supabase production settings, and how the Python agents run alongside the deployed frontend.
+
 ## Roadmap
 
 **Phase 1 — current**
