@@ -2,9 +2,9 @@
 
 The plain `list_items` / `upsert_items` functions below do the actual
 Supabase work and are also imported directly by
-`workflows/receipt_parsing.py`, which needs the same data without going
+`api/workflows/receipt_parsing.py`, which needs the same data without going
 through the MCP protocol — mirrors the pattern in
-`mcp_servers/recipe_database.py`.
+`api/mcp_servers/recipe_database.py`.
 
 Uses the Supabase service role key (bypasses RLS) rather than a per-user
 session, since this runs as a trusted backend process — callers pass the

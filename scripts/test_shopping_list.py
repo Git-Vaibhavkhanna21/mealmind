@@ -26,7 +26,7 @@ from dotenv import load_dotenv  # noqa: E402
 
 load_dotenv()
 
-from agents import shopping_list  # noqa: E402
+from api.agents import shopping_list  # noqa: E402
 
 TEST_USER_ID = "258f1143-4e2e-4f42-a389-bcd23c9696d9"
 

@@ -28,7 +28,7 @@ from dotenv import load_dotenv  # noqa: E402
 
 load_dotenv()
 
-from agents import pantry_deductor  # noqa: E402
+from api.agents import pantry_deductor  # noqa: E402
 
 TEST_USER_ID = "258f1143-4e2e-4f42-a389-bcd23c9696d9"
 TEST_USER_EMAIL = "test-cli@mealmind.local"

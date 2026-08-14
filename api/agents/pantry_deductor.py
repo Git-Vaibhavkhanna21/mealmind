@@ -101,7 +101,7 @@ def _extract_json_list(response_text: str) -> list[dict[str, Any]]:
     explanation despite "no prose" instructions, so this scans for the
     array boundaries rather than assuming the whole trimmed response is
     valid JSON — same tolerant-parsing approach as
-    agents/meal_recommender.py's `_extract_json_list`.
+    api/agents/meal_recommender.py's `_extract_json_list`.
     """
     text = response_text.strip()
     start = text.find("[")

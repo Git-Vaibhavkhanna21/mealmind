@@ -5,7 +5,7 @@ meal plan — it's an open-ended judgment call that weighs three different
 kinds of signal at once: what's running low, what would round out items
 already on hand into a full dish, and what would let the user re-cook
 something they've made before. That's exactly the shape of problem handed
-to Sonnet elsewhere in this codebase (see `agents/meal_recommender.py`), so
+to Sonnet elsewhere in this codebase (see `api/agents/meal_recommender.py`), so
 the whole suggestion step — not just ingredient-name reconciliation — is
 delegated to Sonnet here too, rather than Haiku doing lightweight matching
 against a caller-supplied meal plan.
@@ -127,8 +127,8 @@ def _preferences_text(preferences: dict[str, Any]) -> str:
 
 def _extract_json_list(response_text: str) -> list[dict[str, Any]]:
     """Pull the `[...]` array out of a response, tolerating stray prose —
-    same tolerant-parsing approach as agents/meal_recommender.py and
-    agents/pantry_deductor.py, since Sonnet occasionally prefaces JSON
+    same tolerant-parsing approach as api/agents/meal_recommender.py and
+    api/agents/pantry_deductor.py, since Sonnet occasionally prefaces JSON
     output with a sentence of explanation despite "no prose" instructions.
     """
     text = response_text.strip()
