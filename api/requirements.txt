@@ -1,0 +1,17 @@
+# fastapi, uvicorn, anthropic, openai, supabase, pdfplumber, python-multipart
+# are the service's direct dependencies. mcp and python-dotenv are also
+# required even though they weren't in the original list: mcp_servers/
+# pantry_inventory.py (imported transitively by every agent this service
+# calls) does `from mcp.server import MCPServer` at module level, so the
+# app fails to import at all without `mcp` installed; python-dotenv backs
+# the `load_dotenv()` call in main.py used for local development (a no-op
+# in production, where Railway injects env vars directly).
+fastapi>=0.115
+uvicorn>=0.32
+anthropic>=0.40
+openai>=3.0.0
+supabase>=2.31
+pdfplumber>=0.11
+python-multipart>=0.0.9
+mcp>=2.0.0
+python-dotenv>=1.2

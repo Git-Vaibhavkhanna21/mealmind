@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { callPythonApi, parsePythonApiResponse, PythonApiError } from "@/lib/python-api";
 
-// Plain CRUD scoped to the calling user — no model reasoning involved, so
-// unlike the other routes this updates Supabase directly through the
-// per-user (RLS-scoped) server client instead of shelling out to Python.
+export const runtime = "nodejs";
+
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
 
@@ -25,19 +25,18 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     return NextResponse.json({ error: "No valid fields to update" }, { status: 400 });
   }
 
-  // RLS ("Users can update own pantry items") already scopes this to the
-  // caller, but filtering on user_id too keeps the intent explicit.
-  const { data: updated, error } = await supabase
-    .from("pantry_items")
-    .update(updates)
-    .eq("id", id)
-    .eq("user_id", data.user.id)
-    .select()
-    .single();
-
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  try {
+    const response = await callPythonApi(`/pantry-items/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ user_id: data.user.id, ...updates }),
+    });
+    const result = await parsePythonApiResponse(response);
+    return NextResponse.json(result);
+  } catch (error) {
+    if (error instanceof PythonApiError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
+    return NextResponse.json({ error: "Failed to update pantry item" }, { status: 502 });
   }
-
-  return NextResponse.json({ item: updated });
 }

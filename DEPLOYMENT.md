@@ -1,6 +1,6 @@
 # Deployment
 
-MealMind is two things that deploy differently: a Next.js frontend (stateless, deploys cleanly to Vercel) and a set of Python agents/workflows (currently invoked as local subprocesses, which does **not** carry over to Vercel's serverless runtime as-is — see [§4](#4-running-the-python-agents-in-production) before you assume "deploy to Vercel" means "the whole app is live").
+MealMind is two services: a Next.js frontend (deploys to Vercel) and a FastAPI service wrapping the Python agents/workflows (`api/`, deploys to Railway). They're separate because Vercel's serverless functions have no Python interpreter to spawn a subprocess into — see [§4](#4-railway-deployment-fastapi-service) for why that matters and what used to be a gap here.
 
 ## 1. Vercel project setup
 
@@ -9,22 +9,24 @@ This repo deploys from its root with a root-level [`vercel.json`](vercel.json) t
 1. In the Vercel dashboard, **Add New → Project**, import this GitHub repo.
 2. Leave **Root Directory** at its default (the repo root) — `vercel.json`'s `installCommand`/`buildCommand`/`outputDirectory` already `cd frontend` and point the build output at `frontend/.next`. Don't set Root Directory to `frontend` in the dashboard as well; that would make Vercel look for `vercel.json` inside `frontend/` instead of at the repo root, and double up the `cd frontend` in the commands.
 3. Framework Preset should auto-detect as **Next.js** (also pinned explicitly via `"framework": "nextjs"` in `vercel.json`).
-4. Deploy. The first deploy will fail at runtime on any route that hits Supabase until the environment variables in §2 are set — that's expected, add them and redeploy.
+4. Deploy. The first deploy will fail at runtime on any route that touches Supabase or the Python API until the environment variables in §2 are set — that's expected, add them and redeploy. Deploy the Railway service (§4) first if you want everything working on the first Vercel deploy, since §2's `PYTHON_API_URL` depends on it.
 
 *(Alternative, not what's configured here: set Root Directory to `frontend` in the dashboard instead, and move a simpler `vercel.json` — or none at all, since Next.js needs no config for a standard build — inside `frontend/`. Either approach works; don't mix them.)*
 
-## 2. Environment variables
+## 2. Environment variables (Vercel)
 
-Set these in **Vercel → Project → Settings → Environment Variables** (Production, and Preview if you want preview deploys to work against the same Supabase project):
+Set these in **Vercel → Project → Settings → Environment Variables** (Production, and Preview if you want preview deploys to work against the same backend):
 
 | Variable | Value |
 |---|---|
 | `NEXT_PUBLIC_SUPABASE_URL` | Your Supabase project URL (`https://<project-ref>.supabase.co`) |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase → Project Settings → API → `anon` `public` key |
+| `PYTHON_API_URL` | The Railway service's public URL from §4, e.g. `https://<service>.up.railway.app` (no trailing slash) |
+| `INTERNAL_API_KEY` | Any long random string — must be the **exact same value** set on the Railway service in §4 |
 
 See [`frontend/.env.production.example`](frontend/.env.production.example) for the local-file equivalent (e.g. for `vercel env pull`).
 
-That's genuinely the complete list the Next.js app itself needs — grep confirms `frontend/` only ever reads `NEXT_PUBLIC_SUPABASE_URL`/`NEXT_PUBLIC_SUPABASE_ANON_KEY` directly (in `lib/supabase/{client,server,middleware}.ts`). `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `SUPABASE_SERVICE_KEY`, and `THEMEALDB_API_KEY` are consumed by the Python agents, not by Next.js — they belong wherever the Python side actually runs (§4), **not** in Vercel's environment variables. In particular, never put `SUPABASE_SERVICE_KEY` (bypasses RLS) in a Vercel env var that a Next.js/edge process can read unless a server-only code path genuinely needs it — today, nothing in `frontend/` does.
+Grep confirms `frontend/` only reads `NEXT_PUBLIC_SUPABASE_URL`/`NEXT_PUBLIC_SUPABASE_ANON_KEY` directly (in `lib/supabase/{client,server,middleware}.ts`) plus `PYTHON_API_URL`/`INTERNAL_API_KEY` (in `lib/python-api.ts`). `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `SUPABASE_SERVICE_KEY`, and `THEMEALDB_API_KEY` are consumed by the Python side and belong in Railway's environment variables (§4), **not** Vercel's — in particular, never put `SUPABASE_SERVICE_KEY` (bypasses RLS) anywhere a Next.js/edge process can read it.
 
 ## 3. Supabase production settings
 
@@ -33,45 +35,47 @@ That's genuinely the complete list the Next.js app itself needs — grep confirm
    - **Site URL**: `https://[LIVE_URL]`
    - **Redirect URLs**: `https://[LIVE_URL]/auth/callback` (in addition to the existing `http://localhost:3000/auth/callback` for local dev — keep both, don't replace one with the other)
 3. **Google OAuth client** (Google Cloud Console): no change needed here — its authorized redirect URI points at Supabase's own fixed callback (`https://<project-ref>.supabase.co/auth/v1/callback`), which doesn't change when the frontend's deployment URL changes. Only the Supabase-side redirect URLs in step 2 need the new domain.
-4. **RLS**: already enabled with per-user policies from `0001_init.sql` — nothing to change for deployment, just confirm in Table Editor that all five tables still show "RLS enabled" (same check as the original setup doc).
+4. **RLS**: already enabled with per-user policies from `0001_init.sql` — nothing to change for deployment, just confirm in Table Editor that all five tables still show "RLS enabled" (same check as the original setup doc). Note that the FastAPI service uses the service role key and bypasses RLS entirely by design (§4 explains why that's gated behind `INTERNAL_API_KEY`) — RLS is what protects direct browser/Next.js access to Supabase, not the Python service.
 5. **Recipe corpus**: if this is a fresh Supabase project rather than the one already seeded during development, run `database/seed_recipes.py` once against it before the meal recommender/shopping list agents will have anything to retrieve.
 
-## 4. Running the Python agents in production
+## 4. Railway deployment (FastAPI service)
 
-**This is the part that needs a real decision, not just configuration — read this before treating a Vercel deploy as "done."**
+### Background: why this service exists
 
-### How it works today (local dev only)
+Every route touching a Python agent (`parse-receipt`, `recommend`, `custom-recipe`, `confirm-cook`, `shopping-list`, and the pantry item edit) used to work by having the Next.js API route spawn a Python subprocess directly (`.venv/bin/python3 <script>`). That's fine for `next dev` on a full local checkout, but Vercel's serverless Node functions have no Python interpreter or project `.venv` to spawn into — those routes would 500 in production. `api/main.py` wraps the same agent code in a FastAPI app that deploys as its own always-on service on Railway (a platform built for long-running processes, unlike Vercel's serverless model), and the Next.js routes now call it over HTTP instead.
 
-`frontend/app/api/{parse-receipt,recommend,confirm-cook,shopping-list}/route.ts` each spawn a Python subprocess directly:
+### Setup
 
-```ts
-const REPO_ROOT = path.resolve(process.cwd(), "..");
-const PYTHON_BIN = path.join(REPO_ROOT, ".venv", "bin", "python3");
-execFile(PYTHON_BIN, [AGENT_SCRIPT, ...args], { cwd: REPO_ROOT });
-```
+1. In the Railway dashboard, **New Project → Deploy from GitHub repo**, select this repo.
+2. **Settings → Root Directory**: leave it at the repo root (the default) — do **not** set it to `api/`. `api/main.py` imports `agents/`, `workflows/`, and `mcp_servers/` as sibling packages one level up; if Railway's root were `api/`, those directories wouldn't be part of the deployment at all and every import would fail. This is also why [`Procfile`](Procfile) and [`railway.json`](railway.json) live at the repo root rather than inside `api/` (despite `api/` being where the app code itself lives) — Railway looks for both at whatever it's configured to treat as the project root, and `Procfile`'s `uvicorn api.main:app` module path only resolves correctly with the repo root as the working directory.
+3. Railway auto-detects `railway.json` (Nixpacks builder, `pip install -r api/requirements.txt`) and `Procfile` (`uvicorn api.main:app --host 0.0.0.0 --port $PORT`) — no further build configuration needed.
+4. **Variables**, set:
 
-This works when `next dev` runs from `frontend/` inside a full checkout of this repo, next to a `.venv/` with `pip install -r requirements.txt` already run. Every agent test in this repo (`scripts/test_*.py`) exercises the Python side this same way.
+   | Variable | Value |
+   |---|---|
+   | `ANTHROPIC_API_KEY` | From the Anthropic console |
+   | `OPENAI_API_KEY` | From the OpenAI dashboard (used for `text-embedding-3-small`) |
+   | `SUPABASE_URL` | Same Supabase project URL as Vercel's `NEXT_PUBLIC_SUPABASE_URL` |
+   | `SUPABASE_SERVICE_KEY` | Supabase → Project Settings → API → `service_role` key — **never** set this in Vercel |
+   | `THEMEALDB_API_KEY` | `1` (the free tier test key) unless you've bought a real one |
+   | `INTERNAL_API_KEY` | Same long random string set as Vercel's `INTERNAL_API_KEY` in §2 |
 
-### Why that doesn't work on Vercel
+5. Deploy. Railway assigns a public URL (**Settings → Networking → Generate Domain** if one isn't assigned automatically) — that's the value for Vercel's `PYTHON_API_URL` in §2.
+6. Smoke-test it directly before wiring up Vercel:
+   ```bash
+   curl -X POST https://<service>.up.railway.app/recommend \
+     -H "Content-Type: application/json" \
+     -H "X-Internal-Api-Key: <your INTERNAL_API_KEY>" \
+     -d '{"user_id": "<a real user id from the users table>"}'
+   ```
+   A `401` means the internal API key doesn't match; a `404` means the `user_id` doesn't exist in `users`; a `200` with a `recipes` array means it's working.
 
-Vercel's Node.js Serverless Functions run in ephemeral, isolated containers with no preinstalled Python interpreter and no project `.venv` — there's nothing for `execFile` to spawn. Even setting that aside, `frontend/next.config.ts` now deliberately excludes `agents/`, `workflows/`, `mcp_servers/`, `database/`, `scripts/`, `prompts/`, and `.venv/` from the deployment bundle (pinning `turbopack.root` to `frontend/` itself) — correct for keeping the JS bundle clean, but it also means those files simply aren't present at all in a Vercel deployment, even if a Python runtime somehow were.
+### How `PYTHON_API_URL` and `INTERNAL_API_KEY` connect the two services
 
-Concretely: as configured by this PR, the four routes above will return a 500 in production the moment they try to spawn Python, because there's no Python binary and no agent code present in that environment. Every other route (auth, static pages, the plain-CRUD `pantry-items`/`shopping-list-items` PATCH routes that talk to Supabase directly) is unaffected — those don't touch Python.
-
-### Recommended path forward (not implemented in this PR — deliberately configuration-only)
-
-Run the Python agents as their own always-on service, reachable over HTTPS, on a host built for long-running processes rather than serverless functions — a small VM/droplet, or a platform like Fly.io, Railway, or Render. Concretely:
-
-1. Deploy this repo's Python side (`agents/`, `workflows/`, `mcp_servers/`, `requirements.txt`) to that host; `pip install -r requirements.txt` once at deploy time, not per-request.
-2. Set `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`, and `THEMEALDB_API_KEY` as that host's environment variables (this is where they belong — not in Vercel).
-3. Wrap the four agent entry points in a small HTTP server (each already has a CLI contract — argv in, JSON on stdout — that maps cleanly onto request/response handlers) and expose it behind HTTPS.
-4. Update the four `route.ts` handlers to `fetch()` that service instead of `execFile`-ing a local binary, passing the same arguments they pass today.
-
-A lighter-weight alternative worth naming: Vercel does support Python as its own Serverless Function runtime (functions written *in* Python, deployed as `api/*.py` files — a different mechanism from a Node function spawning a subprocess). That would keep everything on Vercel, but it's not a drop-in fix either — it means rewriting each agent's CLI-argv/stdout-JSON contract as a request handler, and `pdfplumber`'s dependency chain (Pillow, pypdfium2) plus the other Python dependencies would need to fit Vercel's Python runtime's package size and cold-start constraints. Worth evaluating, but out of scope here.
-
-### What works without any further changes
-
-Local development. `next dev` plus a local `.venv` already runs the full pipeline end to end — this is genuinely how the agents "run alongside" the frontend today, and it's not going away; it's how every `scripts/test_*.py` in this repo has been verified. The gap described above is specifically about the *production* Vercel deployment, not local dev.
+- Every Next.js route that needs the Python side calls `frontend/lib/python-api.ts`'s `callPythonApi()`, which does `fetch(\`${PYTHON_API_URL}${path}\`, ...)` with an `X-Internal-Api-Key` header attached. `PYTHON_API_URL` is just "where is the FastAPI service" — Vercel's copy of it points at the Railway deployment.
+- `INTERNAL_API_KEY` isn't part of the original spec for this feature — it's a shared secret added because the FastAPI service authenticates its own calls to Supabase with the **service role key** (bypasses RLS) and accepts a caller-supplied `user_id` on every endpoint. Without some check, anyone who found the Railway URL could read or write *any* user's pantry, recipes, or shopping list just by supplying their id in the request body — Railway URLs aren't secret, and this service has no independent way to verify a `user_id` claim the way Supabase's own JWT-based auth does. `api/main.py`'s `_require_internal_api_key` dependency rejects any request missing the header or presenting the wrong value, so only requests originating from this Next.js deployment (the only place `INTERNAL_API_KEY` is configured, in Vercel) are accepted.
+- Both values must match exactly between Vercel and Railway. If you rotate `INTERNAL_API_KEY`, update it in both places at once — every request will 401 in between.
+- Note that `INTERNAL_API_KEY` gates the *service*, not individual users: Next.js has already authenticated the human via Supabase's session cookie (`supabase.auth.getUser()`) before ever calling the Python API, and forwards that user's real id. `INTERNAL_API_KEY` just proves the *caller* is this app's backend, not a stranger who found the Railway URL — it doesn't re-verify which human is behind the request; the `user_id` existence check in `api/main.py` (`_require_user`) is a lighter sanity check on top of that, not a substitute for it.
 
 ## Live URL
 
