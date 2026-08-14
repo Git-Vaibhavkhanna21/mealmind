@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRef, useState, type ChangeEvent, type FormEvent } from "react";
 
 type PantryItem = {
@@ -17,6 +18,7 @@ export function PantryClient({ initialItems }: { initialItems: PantryItem[] }) {
   const [text, setText] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
@@ -28,6 +30,7 @@ export function PantryClient({ initialItems }: { initialItems: PantryItem[] }) {
   async function submitFormData(formData: FormData) {
     setIsSubmitting(true);
     setError(null);
+    setSuccessMessage(null);
     try {
       const response = await fetch("/api/parse-receipt", {
         method: "POST",
@@ -37,9 +40,13 @@ export function PantryClient({ initialItems }: { initialItems: PantryItem[] }) {
       if (!response.ok) {
         throw new Error(result.error ?? "Failed to parse receipt");
       }
-      setItems((current) => [...(result.items as PantryItem[]), ...current]);
+      const addedItems = result.items as PantryItem[];
+      setItems((current) => [...addedItems, ...current]);
       setText("");
       if (fileInputRef.current) fileInputRef.current.value = "";
+      setSuccessMessage(
+        `Added ${addedItems.length} item${addedItems.length === 1 ? "" : "s"} to your pantry.`,
+      );
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to parse receipt");
     } finally {
@@ -151,6 +158,18 @@ export function PantryClient({ initialItems }: { initialItems: PantryItem[] }) {
 
         {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
       </section>
+
+      {successMessage && (
+        <section className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-green-200 bg-green-50 p-4 dark:border-green-900 dark:bg-green-950/40">
+          <p className="text-sm text-green-800 dark:text-green-300">{successMessage}</p>
+          <Link
+            href="/recipes"
+            className="rounded-full bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-zinc-700 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
+          >
+            View Recipes
+          </Link>
+        </section>
+      )}
 
       <section className="flex flex-col gap-3">
         <h2 className="font-medium">
