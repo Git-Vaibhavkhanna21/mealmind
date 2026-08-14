@@ -124,5 +124,8 @@ This reverses the topology PR #12 deliberately set up (Railway Root Directory at
 ### Bugs found and fixed
 None — verified via the exact command requested (`python3 -c "from api.agents.meal_recommender import recommend; print('imports OK')"`) plus a fuller pass: importing `api.main` directly and checking all six routes registered, starting `uvicorn main:app` from within `api/` (the actual Railway invocation) and confirming `/docs` and `/parse-receipt` both work end to end against live Supabase/Anthropic, and importing all three `scripts/test_*.py` and `database/seed_recipes.py` to confirm their updated imports resolve.
 
+## PR #15 — Cleanup: remove superseded root-level Railway config
+`Procfile` and the root-level `railway.json` were leftover from PR #12, which rooted Railway's build at the repo root (`uvicorn api.main:app`, with `agents/`/`workflows/`/`mcp_servers/` as siblings of `api/`). PR #13 switched the actual deployment approach to rooting Railway at `api/` instead (`api/nixpacks.toml`/`api/railway.json`, `uvicorn main:app`), and PR #14 restructured the repo to match by moving those Python packages inside `api/` — but the original root-level `Procfile`/`railway.json` were never deleted once superseded, so they sat around as dead, contradictory config that could mislead anyone reading the repo into thinking Railway was still rooted at the repo root. Removed now that nothing reads or references them.
+
 ## How this log is maintained
 CLAUDE.md instructs Claude Code to update this file at the end of every PR before the final commit. Each entry documents what was built, architectural decisions and reasoning, and bugs found and fixed. Written for a technical interviewer reading the public repository.
