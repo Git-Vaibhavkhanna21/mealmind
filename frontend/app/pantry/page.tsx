@@ -23,7 +23,8 @@ export default async function PantryPage() {
     <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-8 p-8 sm:p-16">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Pantry</h1>
-        <p className="mt-1 text-zinc-600 dark:text-zinc-400">
+        <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-500">Welcome, {user.email}</p>
+        <p className="mt-2 text-zinc-600 dark:text-zinc-400">
           Upload a receipt to add items automatically, or enter them by hand.
         </p>
       </div>
