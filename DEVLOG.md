@@ -82,5 +82,15 @@ Fuzzy ingredient matching ("fresh spinach" vs. a pantry item named "spinach") is
 ### Bugs found and fixed
 None — `_extract_json_list`'s tolerant parsing (scan for `[...]` rather than assuming clean JSON) was carried over from `agents/meal_recommender.py` from the start, so the prose-prefixed-response failure mode that surfaced there didn't recur here.
 
+## PR #10 — Shopping list agent
+### What was built
+`agents/shopping_list.py`: reads the user's non-depleted pantry (via `mcp_servers/pantry_inventory`), their last 10 confirmed-cooked recipes with ingredients (`user_recipe_history` joined to `recipes`), and their `cooking_skill`/`dietary_restrictions`, then asks `claude-sonnet-4-6` to suggest items — each with `name`, `quantity`, `unit`, and a one-sentence `rationale` explaining whether it replenishes something running low, complements what's already on hand, or re-enables a dish cooked before. Persisting a new list deletes the previous unpurchased items and inserts the new batch, leaving anything already marked purchased untouched as history. `app/api/shopping-list/route.ts` triggers the agent; `app/api/shopping-list-items/[id]/route.ts` toggles `purchased` directly via the RLS-scoped client. `/shopping-list` displays the list with a checkbox per item and a Regenerate button. `scripts/test_shopping_list.py` runs the agent against the existing (unmodified) test user's pantry and history and prints the full list with rationales.
+
+### Architectural decisions
+The old stub signature (`build_list(planned_meals, pantry_items)`) assumed a fixed meal plan to diff against pantry stock — closer to set arithmetic than judgment. The actual spec asks for something more open-ended: weighing three different kinds of signal (replenishment, complementary pantry rounding-out, re-enabling a past dish) with no fixed rule for combining them. That's the same shape of reasoning as `agents/meal_recommender.py`, so the model choice moved from Haiku (documented for "fuzzy ingredient-name matching") to Sonnet, and the README's description of this agent and its model choice were updated to match. As with the pantry edit route, `shopping-list-items/[id]/route.ts`'s purchased toggle is plain RLS-scoped CRUD and talks to Supabase directly rather than through Python.
+
+### Bugs found and fixed
+None — verified the trickiest part of the persistence logic (regenerating replaces unpurchased items but leaves purchased ones alone) directly against Supabase: marked one item purchased, regenerated, and confirmed the purchased row survived untouched while all 12 unpurchased rows were replaced.
+
 ## How this log is maintained
 CLAUDE.md instructs Claude Code to update this file at the end of every PR before the final commit. Each entry documents what was built, architectural decisions and reasoning, and bugs found and fixed. Written for a technical interviewer reading the public repository.
