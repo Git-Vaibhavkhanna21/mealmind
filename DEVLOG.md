@@ -147,5 +147,15 @@ Replaced the `/onboarding` placeholder with a real form: cooking skill as three 
 ### Bugs found and fixed
 None.
 
+## PR #18 — Add persistent navigation and post-upload CTA
+### What was built
+`components/nav.tsx`: a horizontal navigation bar (Pantry/Recipes/Shopping List links, active link highlighted via `usePathname`, a Sign Out button calling `supabase.auth.signOut()` then redirecting to `/`) rendered globally in `app/layout.tsx`. The nav hides itself on `/` and `/onboarding` via a pathname check inside the component itself. `components/pantry-client.tsx`: after a receipt upload succeeds, shows a success banner ("Added N item(s) to your pantry.") with a "View Recipes" button linking to `/recipes`, giving users a clear next step instead of leaving them looking at an updated list with no indication of what to do next.
+
+### Architectural decisions
+Nav's dark styling (`bg-zinc-900`, always dark regardless of the site's own light/dark mode) is deliberate — a persistent header that doesn't flip with `dark:` variants reads consistently as "the app chrome" against pages that do toggle. The hidden-routes check lives inside the client `Nav` component rather than gating `<Nav />`'s rendering in `layout.tsx`, since App Router layouts are Server Components and can't read the current request pathname directly — only a client component can, via `usePathname`.
+
+### Bugs found and fixed
+None.
+
 ## How this log is maintained
 CLAUDE.md instructs Claude Code to update this file at the end of every PR before the final commit. Each entry documents what was built, architectural decisions and reasoning, and bugs found and fixed. Written for a technical interviewer reading the public repository.
