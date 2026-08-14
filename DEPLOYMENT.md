@@ -4,14 +4,14 @@ MealMind is two services: a Next.js frontend (deploys to Vercel) and a FastAPI s
 
 ## 1. Vercel project setup
 
-This repo deploys from its root with a root-level [`vercel.json`](vercel.json) that points the build at `frontend/`, so no manual "Root Directory" configuration is needed in the Vercel dashboard:
+Root Directory (a dashboard-only project setting — it isn't a `vercel.json` property, despite most other build settings having one) must be set to `frontend/`, since that's where the actual Next.js app lives:
 
 1. In the Vercel dashboard, **Add New → Project**, import this GitHub repo.
-2. Leave **Root Directory** at its default (the repo root) — `vercel.json`'s `installCommand`/`buildCommand`/`outputDirectory` already `cd frontend` and point the build output at `frontend/.next`. Don't set Root Directory to `frontend` in the dashboard as well; that would make Vercel look for `vercel.json` inside `frontend/` instead of at the repo root, and double up the `cd frontend` in the commands.
-3. Framework Preset should auto-detect as **Next.js** (also pinned explicitly via `"framework": "nextjs"` in `vercel.json`).
+2. **Settings → Build and Deployment → Root Directory**: set it to `frontend`. This is why [`frontend/vercel.json`](frontend/vercel.json) lives inside `frontend/` rather than at the repo root — once Root Directory is `frontend`, Vercel looks for `vercel.json` there (see the [Related Projects example](https://vercel.com/docs/monorepos) in Vercel's own monorepo docs, which shows this exact `apps/<app>/vercel.json` placement). A repo-root `vercel.json` is simply not read once Root Directory points elsewhere.
+3. With Root Directory correctly pointed at `frontend/`, Vercel's install/build/output steps all auto-configure against `frontend/package.json` — no custom `installCommand`/`buildCommand`/`outputDirectory` needed. `frontend/vercel.json` only pins `"framework": "nextjs"` explicitly, as a defensive belt against auto-detection ever picking something else.
 4. Deploy. The first deploy will fail at runtime on any route that touches Supabase or the Python API until the environment variables in §2 are set — that's expected, add them and redeploy. Deploy the Railway service (§4) first if you want everything working on the first Vercel deploy, since §2's `PYTHON_API_URL` depends on it.
 
-*(Alternative, not what's configured here: set Root Directory to `frontend` in the dashboard instead, and move a simpler `vercel.json` — or none at all, since Next.js needs no config for a standard build — inside `frontend/`. Either approach works; don't mix them.)*
+**Why not a root-level `vercel.json` with `cd frontend && ...` custom commands instead?** That was tried first and failed in practice — Vercel reported "No Next.js version detected" even though the custom `installCommand` succeeded, because with Root Directory left at its default (the repo root), Vercel's own Next.js-version detection independently checks the *actual* Root Directory's `package.json` (the repo root's, which has no `next` dependency — only `frontend/package.json` does) regardless of what the custom commands do. Root Directory has to actually point at `frontend/` for that check to find anything; a build-command workaround can't substitute for it.
 
 ## 2. Environment variables (Vercel)
 
