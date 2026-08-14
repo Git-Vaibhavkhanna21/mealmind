@@ -137,5 +137,15 @@ The first proposed fix for this was adding a `rootDirectory` field to the existi
 ### Bugs found and fixed
 The actual root cause of "No Next.js version detected": with Root Directory left at its default (the repo root), Vercel's Next.js-version detection independently checks the *actual* Root Directory's `package.json` for a `next` dependency — the repo root's `package.json` doesn't exist at all (only `frontend/package.json` does) — regardless of whether a custom `buildCommand`/`installCommand` elsewhere in `vercel.json` successfully `cd`s into `frontend/` and builds there. A build-command workaround can't substitute for Root Directory actually pointing at the right place; the two are checked independently.
 
+## PR #17 — Onboarding form and pantry base UI
+### What was built
+Replaced the `/onboarding` placeholder with a real form: cooking skill as three clickable cards (Beginner/Intermediate/Advanced, each with a short description), dietary restrictions as multi-select pill checkboxes (Vegetarian, Vegan, Gluten-free, Dairy-free, Halal, Kosher, plus a mutually-exclusive "None"), and maximum cooking time as a four-option segmented control (15/30/45/60+ minutes). Submitting posts to a new `app/api/onboarding/route.ts`, which validates the payload and updates the `users` row (`cooking_skill`, `dietary_restrictions`, `max_cooking_time`, `onboarding_complete=true`) via the RLS-scoped per-user client, then redirects client-side to `/pantry`. Also added a welcome message with the user's email to `/pantry`'s header and tightened the empty-pantry-state wording.
+
+### Architectural decisions
+`/pantry` turned out not to actually be a placeholder — it was already fully built out (real receipt upload with text fallback, live pantry list, inline edit, empty state) in an earlier PR, despite the task describing it as one. Rather than rebuild working functionality, only the genuinely missing piece (the welcome message) and a wording tweak were added; flagged this before proceeding rather than silently doing a larger rewrite than necessary. The onboarding "None" dietary option is UI-only — selecting it clears the restrictions array and disables the other pills, but nothing named "none" is ever written to the `dietary_restrictions` column; an empty array already means no restrictions, matching the schema's own default. `app/api/onboarding/route.ts` talks to Supabase directly through the RLS-scoped client rather than through the Python API, same reasoning as the pantry-items and shopping-list-items PATCH routes — plain single-row CRUD scoped to the caller by RLS, no model reasoning involved.
+
+### Bugs found and fixed
+None.
+
 ## How this log is maintained
 CLAUDE.md instructs Claude Code to update this file at the end of every PR before the final commit. Each entry documents what was built, architectural decisions and reasoning, and bugs found and fixed. Written for a technical interviewer reading the public repository.

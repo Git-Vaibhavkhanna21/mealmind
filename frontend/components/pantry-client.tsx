@@ -158,7 +158,7 @@ export function PantryClient({ initialItems }: { initialItems: PantryItem[] }) {
         </h2>
         {items.length === 0 ? (
           <p className="text-sm text-zinc-600 dark:text-zinc-400">
-            No pantry items yet — upload a receipt to get started.
+            Your pantry is empty. Upload a receipt or add items to get started.
           </p>
         ) : (
           <ul className="flex flex-col divide-y divide-zinc-200 dark:divide-zinc-800">
