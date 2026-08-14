@@ -43,7 +43,7 @@ export function RecipesClient() {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch("/api/recommend", {
+      const response = await fetch(request ? "/api/custom-recipe" : "/api/recommend", {
         method: "POST",
         headers: request ? { "Content-Type": "application/json" } : undefined,
         body: request ? JSON.stringify({ request }) : undefined,
