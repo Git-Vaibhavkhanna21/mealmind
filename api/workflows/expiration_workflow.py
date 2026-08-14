@@ -5,7 +5,7 @@ right after receipt parsing: it always calls the Haiku batch estimator
 first, then branches — call the Sonnet subagent, or don't — purely on
 whether Haiku reported "low" confidence for a given item. That branching
 condition is a fixed rule, not a judgment call, which is why it lives here
-in the workflow rather than in `agents/expiration.py` itself (see
+in the workflow rather than in `api/agents/expiration.py` itself (see
 "Workflows vs. agents" in the README).
 """
 

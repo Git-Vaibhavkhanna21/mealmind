@@ -8,23 +8,23 @@ MealMind turns a photo of a grocery receipt into a running pantry inventory, the
 
 ### Workflows vs. agents
 
-MealMind draws a hard line between **workflows** (`workflows/`) and **agents** (`agents/`), and that line is the main architectural decision in the codebase:
+MealMind draws a hard line between **workflows** (`api/workflows/`) and **agents** (`api/agents/`), and that line is the main architectural decision in the codebase:
 
 - A **workflow** is deterministic control flow. The sequence of steps is fixed and known in advance regardless of what any individual step returns — step 2 always follows step 1. Workflows own orchestration, retries, and persistence, and they call into agents for the specific sub-steps that need model reasoning.
 - An **agent** is used where the next action, or the interpretation of the input, can't be hard-coded — where the model has to make a judgment call under ambiguity.
 
-`agents/orchestrator.py` sits above both: it's a thin dispatch layer that routes an incoming event (receipt upload, scheduled expiration check, user request) to the right workflow or agent. It does no domain reasoning itself, which keeps the routing logic testable independent of any model behavior.
+`api/agents/orchestrator.py` sits above both: it's a thin dispatch layer that routes an incoming event (receipt upload, scheduled expiration check, user request) to the right workflow or agent. It does no domain reasoning itself, which keeps the routing logic testable independent of any model behavior.
 
 Applying that principle to each piece of the pipeline:
 
 | Component | Type | Why |
 |---|---|---|
-| `workflows/receipt_parsing.py` | Workflow | The steps (OCR → extract → validate → persist) never branch based on content — always run in this order, so there's no reason to spend a model call deciding "what's next." |
-| `agents/parser.py` | Agent | Receipt OCR output is unstructured and inconsistent — abbreviated item names, merged lines, store-specific formatting. Turning that into normalized `(name, quantity, unit, category)` records requires interpretation, not pattern matching. |
-| `workflows/expiration_workflow.py` | Workflow | Runs on a fixed schedule, fetches pantry state, calls the expiration agent, and branches to a fallback on failure — the branching condition (did the model call succeed?) is deterministic, not a judgment call. |
-| `agents/expiration.py` | Agent (with Sonnet subagent fallback) | Estimating shelf life from a bare item name ("spinach," no purchase context) benefits from a model that knows typical spoilage patterns by category and storage condition. See fallback design below. |
-| `agents/meal_recommender.py` | Agent | Ranking retrieved recipes against pantry contents, expiring items, and user preferences is an open-ended judgment call — there's no fixed rule for "best meal to cook tonight." |
-| `agents/shopping_list.py` | Agent | Deciding what to buy next weighs several open-ended signals at once — what's running low, what would round out pantry items already on hand into a full dish, what would re-enable a recipe cooked before — with no fixed rule for combining them, so the whole suggestion step is delegated to a model rather than just ingredient-name reconciliation. |
+| `api/workflows/receipt_parsing.py` | Workflow | The steps (OCR → extract → validate → persist) never branch based on content — always run in this order, so there's no reason to spend a model call deciding "what's next." |
+| `api/agents/parser.py` | Agent | Receipt OCR output is unstructured and inconsistent — abbreviated item names, merged lines, store-specific formatting. Turning that into normalized `(name, quantity, unit, category)` records requires interpretation, not pattern matching. |
+| `api/workflows/expiration_workflow.py` | Workflow | Runs on a fixed schedule, fetches pantry state, calls the expiration agent, and branches to a fallback on failure — the branching condition (did the model call succeed?) is deterministic, not a judgment call. |
+| `api/agents/expiration.py` | Agent (with Sonnet subagent fallback) | Estimating shelf life from a bare item name ("spinach," no purchase context) benefits from a model that knows typical spoilage patterns by category and storage condition. See fallback design below. |
+| `api/agents/meal_recommender.py` | Agent | Ranking retrieved recipes against pantry contents, expiring items, and user preferences is an open-ended judgment call — there's no fixed rule for "best meal to cook tonight." |
+| `api/agents/shopping_list.py` | Agent | Deciding what to buy next weighs several open-ended signals at once — what's running low, what would round out pantry items already on hand into a full dish, what would re-enable a recipe cooked before — with no fixed rule for combining them, so the whole suggestion step is delegated to a model rather than just ingredient-name reconciliation. |
 
 ### Model selection
 
@@ -40,7 +40,7 @@ Model choice follows task shape — volume and latency sensitivity on one axis, 
 
 ### Why MCP servers instead of direct API calls
 
-`mcp_servers/pantry_inventory.py` and `mcp_servers/recipe_database.py` wrap the pantry store and recipe source behind MCP tool contracts rather than having agents call Supabase or TheMealDB directly:
+`api/mcp_servers/pantry_inventory.py` and `api/mcp_servers/recipe_database.py` wrap the pantry store and recipe source behind MCP tool contracts rather than having agents call Supabase or TheMealDB directly:
 
 - **Decoupling.** Agents call `list_items`, `upsert_item`, `query_recipes_by_ingredients`, etc. — identical tool schemas regardless of what's behind them. Swapping the recipe source or moving off Supabase later means changing the MCP server implementation, not every agent that reads pantry or recipe data.
 - **Credential isolation.** Agent processes hold no direct database credentials — only a tool contract. Database access is scoped to two small, independently auditable server processes instead of the entire agent codebase.
@@ -51,10 +51,10 @@ Model choice follows task shape — volume and latency sensitivity on one axis, 
 
 Recipe retrieval doesn't hand the meal recommender agent the entire recipe corpus — it narrows the field with a vector search first, then lets the model reason over a short list:
 
-1. Recipes ingested from TheMealDB (via `mcp_servers/recipe_database.py`) are embedded — title, ingredient list, and instructions — and the resulting vector is stored on the `recipes` row using Supabase's `pgvector` extension.
+1. Recipes ingested from TheMealDB (via `api/mcp_servers/recipe_database.py`) are embedded — title, ingredient list, and instructions — and the resulting vector is stored on the `recipes` row using Supabase's `pgvector` extension.
 2. When a recommendation is requested, the pantry items nearest expiration are turned into a query embedding.
 3. `pgvector` runs an approximate nearest-neighbor search (cosine similarity, `ivfflat`/`hnsw` index) to pull the top-K semantically closest recipes — e.g. recipes whose ingredient profile overlaps most with what's on hand.
-4. Those K candidates, not the full corpus, are passed into `agents/meal_recommender.py`'s prompt for final ranking and justification.
+4. Those K candidates, not the full corpus, are passed into `api/agents/meal_recommender.py`'s prompt for final ranking and justification.
 
 This keeps the reasoning step's token cost and latency bounded regardless of how large the recipe corpus grows, and it lets retrieval improve independently of the ranking model. `pgvector` specifically (rather than a standalone vector database) was chosen because embeddings live in the same Postgres instance as the relational recipe metadata — a single SQL query can combine metadata filters (dietary tags, prep time) with vector similarity (`WHERE dietary_tags @> ARRAY['vegetarian'] ORDER BY embedding <=> query_embedding LIMIT 10`), avoiding a second system to keep in sync.
 
@@ -74,26 +74,26 @@ The four stages run in this order, each handing structured output to the next:
 
 ```mermaid
 flowchart LR
-    A[Receipt Upload] --> B["Receipt Parsing Workflow\n(workflows/receipt_parsing.py)"]
+    A[Receipt Upload] --> B["Receipt Parsing Workflow\n(api/workflows/receipt_parsing.py)"]
     B -->|structured items| C[(Pantry Inventory\nMCP Server)]
-    C --> D["Expiration Workflow\n(workflows/expiration_workflow.py)"]
+    C --> D["Expiration Workflow\n(api/workflows/expiration_workflow.py)"]
     D -->|LLM estimate| E{Confident?}
     E -->|yes| F[Expiration Dates Written]
     E -->|no / low confidence| G["Sonnet Subagent\n(reasons through the single item)"]
     G --> F
-    F --> H["Meal Recommendation Agent\n(agents/meal_recommender.py)"]
+    F --> H["Meal Recommendation Agent\n(api/agents/meal_recommender.py)"]
     H -->|RAG over recipes, pgvector| H
-    H -->|ranked recipes| I["Shopping List Agent\n(agents/shopping_list.py)"]
+    H -->|ranked recipes| I["Shopping List Agent\n(api/agents/shopping_list.py)"]
     I --> J[Shopping List]
 ```
 
-1. **Receipt parsing workflow** (`workflows/receipt_parsing.py`) — Takes an uploaded receipt image, PDF, or plain text. Images are handed to `agents/parser.py` directly for Claude vision extraction; PDFs are text-extracted with `pdfplumber` first, since that step is deterministic and doesn't need a model call. Either way, `agents/parser.py` turns the content into normalized `(name, quantity, unit)` records, the workflow attaches today's date as `purchase_date`, hands the batch to the expiration workflow for `expiry_date` estimates, and writes the result to pantry inventory via the pantry MCP server. Deterministic sequence; the only reasoning steps are delegated to the parser and expiration agents.
+1. **Receipt parsing workflow** (`api/workflows/receipt_parsing.py`) — Takes an uploaded receipt image, PDF, or plain text. Images are handed to `api/agents/parser.py` directly for Claude vision extraction; PDFs are text-extracted with `pdfplumber` first, since that step is deterministic and doesn't need a model call. Either way, `api/agents/parser.py` turns the content into normalized `(name, quantity, unit)` records, the workflow attaches today's date as `purchase_date`, hands the batch to the expiration workflow for `expiry_date` estimates, and writes the result to pantry inventory via the pantry MCP server. Deterministic sequence; the only reasoning steps are delegated to the parser and expiration agents.
 
-2. **Expiration workflow, with subagent fallback** (`workflows/expiration_workflow.py`) — After a receipt parse (or on a future schedule), estimates expiry dates for the pantry items via `agents/expiration.py`'s Haiku batch call. Any item that call flags low-confidence on is escalated to a Sonnet subagent — a slower, single-item call that reasons through the harder case individually — so the workflow always terminates with a best-effort date rather than leaving items unestimated. Items flagged as expiring soon trigger the meal recommendation agent.
+2. **Expiration workflow, with subagent fallback** (`api/workflows/expiration_workflow.py`) — After a receipt parse (or on a future schedule), estimates expiry dates for the pantry items via `api/agents/expiration.py`'s Haiku batch call. Any item that call flags low-confidence on is escalated to a Sonnet subagent — a slower, single-item call that reasons through the harder case individually — so the workflow always terminates with a best-effort date rather than leaving items unestimated. Items flagged as expiring soon trigger the meal recommendation agent.
 
-3. **Meal recommendation agent** (`agents/meal_recommender.py`) — Given pantry contents (weighted toward items nearing expiration), retrieves a shortlist of candidate recipes via the pgvector-backed RAG step described above, then reasons over that shortlist to produce a ranked, explained set of suggestions — factoring in what's expiring, user dietary settings, and (Phase 2) learned preferences.
+3. **Meal recommendation agent** (`api/agents/meal_recommender.py`) — Given pantry contents (weighted toward items nearing expiration), retrieves a shortlist of candidate recipes via the pgvector-backed RAG step described above, then reasons over that shortlist to produce a ranked, explained set of suggestions — factoring in what's expiring, user dietary settings, and (Phase 2) learned preferences.
 
-4. **Shopping list agent** (`agents/shopping_list.py`) — Reads current pantry state, the user's last 10 confirmed-cooked recipes (with ingredients), and their preferences, then asks Sonnet to suggest items that replenish what's running low, complement what's already on hand, or re-enable a dish cooked before — each with a one-sentence rationale. Regenerating replaces the unpurchased items from the previous list; anything already marked purchased is left alone as history.
+4. **Shopping list agent** (`api/agents/shopping_list.py`) — Reads current pantry state, the user's last 10 confirmed-cooked recipes (with ingredients), and their preferences, then asks Sonnet to suggest items that replenish what's running low, complement what's already on hand, or re-enable a dish cooked before — each with a one-sentence rationale. Regenerating replaces the unpurchased items from the previous list; anything already marked purchased is left alone as history.
 
 ## Database Schema
 

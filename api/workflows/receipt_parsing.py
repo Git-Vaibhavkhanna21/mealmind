@@ -4,7 +4,7 @@ The steps here (route by input type -> extract -> attach purchase date ->
 estimate expiry -> persist) never branch based on what a model returns —
 always run in this order — so this stays a deterministic workflow. Every
 step that requires judgment (reading the receipt, estimating shelf life) is
-delegated to `agents/parser.py` and `workflows/expiration_workflow.py`.
+delegated to `api/agents/parser.py` and `api/workflows/expiration_workflow.py`.
 
 Can be run as a script (see `_cli` below) so a non-Python caller — the
 Next.js API route at `frontend/app/api/parse-receipt/route.ts` — can invoke

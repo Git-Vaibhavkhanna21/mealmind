@@ -26,7 +26,7 @@ from openai import OpenAI
 from supabase import Client, create_client
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from mcp_servers.recipe_database import (  # noqa: E402
+from api.mcp_servers.recipe_database import (  # noqa: E402
     fetch_categories,
     fetch_recipe_by_id,
     fetch_recipe_summaries_by_category,

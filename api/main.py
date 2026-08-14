@@ -1,17 +1,21 @@
 """FastAPI service wrapping MealMind's Python agents/workflows.
 
-Deploys as its own always-on service (see Procfile, railway.json — both at
-the repo root, not in here; see the note there for why) so the Next.js
-frontend on Vercel can reach it over HTTP. Vercel's serverless functions
-have no Python interpreter or project .venv to spawn a subprocess into,
-which is what every `app/api/*/route.ts` did before this service existed —
-see DEPLOYMENT.md for the full story.
+Deploys as its own always-on service on Railway (see nixpacks.toml,
+railway.json — both in this directory, Railway's Root Directory is api/) so
+the Next.js frontend on Vercel can reach it over HTTP. Vercel's serverless
+functions have no Python interpreter or project .venv to spawn a subprocess
+into, which is what every `app/api/*/route.ts` did before this service
+existed — see DEPLOYMENT.md for the full story.
 
-Run locally with the repo root as the working directory:
-    uvicorn api.main:app --reload
-(matches exactly how Procfile/Railway invoke it in production, so the
-`agents`/`workflows`/`mcp_servers` imports below resolve the same way in
-both places.)
+api/ is a self-contained service: agents/, workflows/, and mcp_servers/
+live inside it as direct siblings of this file, not one level up at the
+repo root — Railway's build only includes files under its configured Root
+Directory, so a sibling-of-api/ layout would leave those imports unresolved
+in production.
+
+Run locally with this directory (api/) as the working directory:
+    cd api && uvicorn main:app --reload
+(matches exactly how nixpacks.toml/Railway invoke it in production.)
 """
 
 from __future__ import annotations
@@ -22,7 +26,7 @@ import tempfile
 from pathlib import Path
 from typing import Any
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from dotenv import load_dotenv  # noqa: E402
 

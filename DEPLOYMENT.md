@@ -1,6 +1,6 @@
 # Deployment
 
-MealMind is two services: a Next.js frontend (deploys to Vercel) and a FastAPI service wrapping the Python agents/workflows (`api/`, deploys to Railway). They're separate because Vercel's serverless functions have no Python interpreter to spawn a subprocess into — see [§4](#4-railway-deployment-fastapi-service) for why that matters and what used to be a gap here.
+MealMind is two services: a Next.js frontend (deploys to Vercel) and a FastAPI service (`api/`, deploys to Railway) — a fully self-contained Python service: `api/agents/`, `api/workflows/`, `api/mcp_servers/`, and `api/prompts/` all live inside it, not at the repo root. They're separate services because Vercel's serverless functions have no Python interpreter to spawn a subprocess into — see [§4](#4-railway-deployment-fastapi-service) for why that matters and what used to be a gap here.
 
 ## 1. Vercel project setup
 
@@ -47,8 +47,8 @@ Every route touching a Python agent (`parse-receipt`, `recommend`, `custom-recip
 ### Setup
 
 1. In the Railway dashboard, **New Project → Deploy from GitHub repo**, select this repo.
-2. **Settings → Root Directory**: leave it at the repo root (the default) — do **not** set it to `api/`. `api/main.py` imports `agents/`, `workflows/`, and `mcp_servers/` as sibling packages one level up; if Railway's root were `api/`, those directories wouldn't be part of the deployment at all and every import would fail. This is also why [`Procfile`](Procfile) and [`railway.json`](railway.json) live at the repo root rather than inside `api/` (despite `api/` being where the app code itself lives) — Railway looks for both at whatever it's configured to treat as the project root, and `Procfile`'s `uvicorn api.main:app` module path only resolves correctly with the repo root as the working directory.
-3. Railway auto-detects `railway.json` (Nixpacks builder, `pip install -r api/requirements.txt`) and `Procfile` (`uvicorn api.main:app --host 0.0.0.0 --port $PORT`) — no further build configuration needed.
+2. **Settings → Root Directory**: set it to `api/`. `api/` is a fully self-contained Python service — `api/agents/`, `api/workflows/`, `api/mcp_servers/`, and `api/prompts/` all live inside it (not as siblings at the repo root), specifically so a Railway service rooted at `api/` has everything `api/main.py` imports. This is also why [`api/nixpacks.toml`](api/nixpacks.toml) and [`api/railway.json`](api/railway.json) live inside `api/` rather than at the repo root — Railway looks for both wherever Root Directory points, and once that's `api/`, `main:app` (not `api.main:app`) is the correct module path, since `main.py` is the working directory's own top-level module at that point.
+3. Railway auto-detects `api/railway.json` (Nixpacks builder) and `api/nixpacks.toml` (start command `uvicorn main:app --host 0.0.0.0 --port $PORT`, no install phase — Nixpacks auto-detects `api/requirements.txt` once it's building from within `api/`) — no further build configuration needed.
 4. **Variables**, set:
 
    | Variable | Value |
