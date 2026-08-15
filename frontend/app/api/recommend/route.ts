@@ -23,6 +23,7 @@ export async function POST() {
     if (error instanceof PythonApiError) {
       return NextResponse.json({ error: error.message }, { status: error.status });
     }
+    console.error("POST /api/recommend failed:", error);
     return NextResponse.json({ error: "Recipe recommendation failed" }, { status: 502 });
   }
 }

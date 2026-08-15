@@ -157,5 +157,15 @@ Nav's dark styling (`bg-zinc-900`, always dark regardless of the site's own ligh
 ### Bugs found and fixed
 None.
 
+## PR #19 — Fix: add error logging and health check route
+### What was built
+Added `console.error(...)` to the generic-error fallback branch in all four routes that call the Python API (`recommend`, `parse-receipt`, `confirm-cook`, `shopping-list`) — previously, any error that wasn't a `PythonApiError` (e.g. the underlying `fetch()` to Railway itself throwing) was caught, discarded, and replaced with a generic message and a hardcoded `502`, with nothing written to the logs. Also added `app/api/health/route.ts`, a GET endpoint returning masked prefixes of `PYTHON_API_URL` and `INTERNAL_API_KEY` (30 and 8 characters respectively) plus a timestamp, to confirm those env vars are actually being read in a given deployment without exposing the full secret.
+
+### Architectural decisions
+This was investigating a live production symptom: users hitting 502s on `/api/recommend`. Checked the actual route code before assuming a cause — Vercel's own docs (verified directly) say a platform-level duration-timeout termination returns `504`, not `502`; since the observed error was `502` specifically, and that status code is hardcoded in this repo's own catch-all fallback, the `502`s are very likely coming from this code's own error handling swallowing a real `fetch()`-level failure, not from Vercel killing the function. This directly contradicted an earlier proposal (in a prior, now-abandoned attempt) to fix the 502s by raising `maxDuration` to 60s — Vercel's current docs also show Hobby's default and maximum duration (with Fluid Compute, on by default for new projects) is 300s, not the 10s default/60s cap that proposal assumed, so that fix wouldn't have addressed the real cause either way. This logging change is the actual next diagnostic step: the next occurrence will show the real underlying error in Vercel's function logs instead of a swallowed, generic message.
+
+### Bugs found and fixed
+The `/api/health` masking snippet as originally specified had a real operator-precedence bug: `value?.slice(0, n) + "..." || "NOT SET"` never falls through to `"NOT SET"` when `value` is `undefined`, because `undefined + "..."` coerces to the *string* `"undefined..."` (JS's `+` stringifies the non-string operand once the other side is a string) — a non-empty string, which is truthy, so `||` never triggers. Verified this concretely: running the exact snippet against `undefined` produces `"undefined..."`, not `"NOT SET"`. Fixed by checking presence before slicing (a ternary) rather than relying on `||` after the concatenation already happened — confirmed the fix returns `"NOT SET"` correctly for the missing case.
+
 ## How this log is maintained
 CLAUDE.md instructs Claude Code to update this file at the end of every PR before the final commit. Each entry documents what was built, architectural decisions and reasoning, and bugs found and fixed. Written for a technical interviewer reading the public repository.
