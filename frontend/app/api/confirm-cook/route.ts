@@ -39,6 +39,7 @@ export async function POST(request: Request) {
     if (error instanceof PythonApiError) {
       return NextResponse.json({ error: error.message }, { status: error.status });
     }
+    console.error("POST /api/confirm-cook failed:", error);
     return NextResponse.json({ error: "Cook confirmation failed" }, { status: 502 });
   }
 }

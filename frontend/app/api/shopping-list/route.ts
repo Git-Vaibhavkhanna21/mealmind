@@ -23,6 +23,7 @@ export async function POST() {
     if (error instanceof PythonApiError) {
       return NextResponse.json({ error: error.message }, { status: error.status });
     }
+    console.error("POST /api/shopping-list failed:", error);
     return NextResponse.json({ error: "Shopping list generation failed" }, { status: 502 });
   }
 }
