@@ -115,7 +115,7 @@ Expected once filled in: prerequisites (Node, Supabase project, Anthropic API ke
 
 ## Deployment
 
-**Live URL: [LIVE_URL]**
+**Live URL: [(https://mealmind-kzd69qi7r-solo-dolo-pm.vercel.app/)]**
 
 The Next.js frontend deploys to Vercel from the `frontend/` directory; see [`DEPLOYMENT.md`](DEPLOYMENT.md) for the full setup — Vercel project configuration, required environment variables, Supabase production settings, and how the Python agents run alongside the deployed frontend.
 
