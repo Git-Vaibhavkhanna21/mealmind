@@ -175,13 +175,17 @@ Five tables, all in Supabase Postgres:
 
 ## Getting Started
 
-> Placeholder — setup instructions land alongside the Phase 1 implementation.
+1. Clone the repo.
+2. Copy `.env.example` to `.env` and fill in `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `SUPABASE_URL`, and `SUPABASE_SERVICE_KEY` — this file backs local runs of the Python agents, workflows, and `database/seed_recipes.py`. See `database/SETUP.md` for applying the schema and setting up Google Auth.
+3. Copy `frontend/.env.local.example` to `frontend/.env.local` and fill in `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
+4. Backend: from `api/`, create a virtualenv, run `pip install -r requirements.txt`, then `uvicorn main:app --reload`.
+5. Frontend: from `frontend/`, run `npm install`, then `npm run dev`.
 
-Expected once filled in: prerequisites (Node, Supabase project, Anthropic API key), environment variables (`ANTHROPIC_API_KEY`, `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`, TheMealDB config), install and run commands for `frontend/`, and how to apply `database/schema.sql`.
+See [`DEPLOYMENT.md`](DEPLOYMENT.md) for deploying this same setup to Vercel and Railway.
 
 ## Deployment
 
-**Live URL: [(https://mealmind-kzd69qi7r-solo-dolo-pm.vercel.app/)]**
+**Live URL: [mealmind-seven.vercel.app](https://mealmind-seven.vercel.app)**
 
 The Next.js frontend deploys to Vercel from the `frontend/` directory; see [`DEPLOYMENT.md`](DEPLOYMENT.md) for the full setup — Vercel project configuration, required environment variables, Supabase production settings, and how the Python agents run alongside the deployed frontend.
 

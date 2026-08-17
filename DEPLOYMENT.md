@@ -79,4 +79,4 @@ Every route touching a Python agent (`parse-receipt`, `recommend`, `custom-recip
 
 ## Live URL
 
-**[LIVE_URL]** — filled in after the first production deploy (see `README.md`'s Deployment section, which links back here).
+**[https://mealmind-seven.vercel.app](https://mealmind-seven.vercel.app)** — see `README.md`'s Deployment section, which links back here.
