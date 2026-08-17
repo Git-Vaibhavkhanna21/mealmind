@@ -15,18 +15,19 @@ export default async function Home() {
       .eq("id", user.id)
       .maybeSingle();
 
-    redirect(
-      existingUser?.onboarding_complete ? "/pantry" : "/onboarding",
-    );
+    redirect(existingUser?.onboarding_complete ? "/pantry" : "/onboarding");
   }
 
   return (
-    <main className="flex flex-1 flex-col items-center justify-center gap-6 p-16 text-center">
-      <h1 className="text-3xl font-semibold tracking-tight">MealMind</h1>
-      <p className="max-w-md text-zinc-600 dark:text-zinc-400">
-        Track your pantry, get recipe ideas, and never waste food again.
+    <main className="flex min-h-screen flex-1 flex-col items-center justify-center gap-3 bg-bg px-6 text-center">
+      <h1 className="font-display text-5xl text-amber">MealMind</h1>
+      <p className="text-lg text-text-mid">Your fridge, finally under control.</p>
+      <p className="text-sm text-muted">
+        Track what you have. Cook what matters. Waste nothing.
       </p>
-      <GoogleSignInButton />
+      <div className="mt-6 w-full max-w-[320px]">
+        <GoogleSignInButton />
+      </div>
     </main>
   );
 }

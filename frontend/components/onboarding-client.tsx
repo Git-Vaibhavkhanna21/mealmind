@@ -1,24 +1,38 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useState, type ComponentType } from "react";
 import { useRouter } from "next/navigation";
+import { Award, ChevronLeft, Flame, Sprout } from "lucide-react";
 
 type CookingSkill = "beginner" | "intermediate" | "advanced";
 
-const COOKING_SKILLS: { value: CookingSkill; label: string; description: string }[] = [
-  { value: "beginner", label: "Beginner", description: "Simple recipes, minimal techniques" },
-  { value: "intermediate", label: "Intermediate", description: "Comfortable with most techniques" },
-  { value: "advanced", label: "Advanced", description: "Complex recipes, confident experimenter" },
+const COOKING_SKILLS: {
+  value: CookingSkill;
+  label: string;
+  description: string;
+  icon: ComponentType<{ size?: number; className?: string }>;
+}[] = [
+  {
+    value: "beginner",
+    label: "Beginner",
+    description: "Simple recipes, minimal techniques",
+    icon: Sprout,
+  },
+  {
+    value: "intermediate",
+    label: "Intermediate",
+    description: "Comfortable with most techniques",
+    icon: Flame,
+  },
+  {
+    value: "advanced",
+    label: "Advanced",
+    description: "Complex recipes, confident experimenter",
+    icon: Award,
+  },
 ];
 
-const DIETARY_OPTIONS = [
-  "Vegetarian",
-  "Vegan",
-  "Gluten-free",
-  "Dairy-free",
-  "Halal",
-  "Kosher",
-];
+const DIETARY_OPTIONS = ["Vegetarian", "Vegan", "Gluten-free", "Dairy-free", "Halal", "Kosher"];
 
 const COOKING_TIME_OPTIONS: { label: string; value: number }[] = [
   { label: "15 min", value: 15 },
@@ -27,8 +41,11 @@ const COOKING_TIME_OPTIONS: { label: string; value: number }[] = [
   { label: "60+ min", value: 60 },
 ];
 
+const STEP_COUNT = 3;
+
 export function OnboardingClient() {
   const router = useRouter();
+  const [step, setStep] = useState(0);
   const [cookingSkill, setCookingSkill] = useState<CookingSkill | null>(null);
   const [dietaryRestrictions, setDietaryRestrictions] = useState<string[]>([]);
   const [noneSelected, setNoneSelected] = useState(false);
@@ -48,14 +65,26 @@ export function OnboardingClient() {
     setDietaryRestrictions([]);
   }
 
-  const canSubmit = cookingSkill !== null && maxCookingTime !== null && !isSubmitting;
+  const canProceed =
+    step === 0 ? cookingSkill !== null : step === 2 ? maxCookingTime !== null : true;
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  function handleBack() {
+    setError(null);
+    setStep((current) => Math.max(0, current - 1));
+  }
+
+  async function handleNext() {
+    if (!canProceed) return;
+    setError(null);
+
+    if (step < STEP_COUNT - 1) {
+      setStep((current) => current + 1);
+      return;
+    }
+
     if (cookingSkill === null || maxCookingTime === null) return;
 
     setIsSubmitting(true);
-    setError(null);
     try {
       const response = await fetch("/api/onboarding", {
         method: "POST",
@@ -78,111 +107,141 @@ export function OnboardingClient() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex w-full max-w-xl flex-col gap-10">
-      <section className="flex flex-col gap-4">
-        <div>
-          <h2 className="font-medium">Cooking skill</h2>
-          <p className="text-sm text-zinc-600 dark:text-zinc-400">
-            How comfortable are you in the kitchen?
-          </p>
-        </div>
-        <div className="grid gap-3 sm:grid-cols-3">
-          {COOKING_SKILLS.map((skill) => (
-            <button
-              key={skill.value}
-              type="button"
-              onClick={() => setCookingSkill(skill.value)}
-              aria-pressed={cookingSkill === skill.value}
-              className={`flex flex-col gap-1 rounded-xl border p-4 text-left transition ${
-                cookingSkill === skill.value
-                  ? "border-zinc-900 bg-zinc-50 dark:border-zinc-100 dark:bg-zinc-800"
-                  : "border-zinc-200 hover:bg-zinc-50 dark:border-zinc-800 dark:hover:bg-zinc-900"
-              }`}
-            >
-              <span className="font-medium">{skill.label}</span>
-              <span className="text-sm text-zinc-600 dark:text-zinc-400">
-                {skill.description}
-              </span>
-            </button>
-          ))}
-        </div>
-      </section>
+    <div className="flex w-full flex-1 flex-col">
+      <div className="mb-6 h-6">
+        {step > 0 && (
+          <button type="button" onClick={handleBack} aria-label="Back" className="text-text-mid">
+            <ChevronLeft size={24} />
+          </button>
+        )}
+      </div>
 
-      <section className="flex flex-col gap-4">
-        <div>
-          <h2 className="font-medium">Dietary restrictions</h2>
-          <p className="text-sm text-zinc-600 dark:text-zinc-400">Select any that apply.</p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <label
-            className={`cursor-pointer rounded-full border px-4 py-2 text-sm transition ${
-              noneSelected
-                ? "border-zinc-900 bg-zinc-900 text-white dark:border-zinc-100 dark:bg-zinc-100 dark:text-zinc-900"
-                : "border-zinc-300 text-zinc-900 hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-100 dark:hover:bg-zinc-900"
-            }`}
-          >
-            <input type="checkbox" checked={noneSelected} onChange={selectNone} className="hidden" />
-            None
-          </label>
-          {DIETARY_OPTIONS.map((option) => {
-            const checked = dietaryRestrictions.includes(option);
-            return (
-              <label
-                key={option}
-                className={`cursor-pointer rounded-full border px-4 py-2 text-sm transition ${
-                  checked
-                    ? "border-zinc-900 bg-zinc-900 text-white dark:border-zinc-100 dark:bg-zinc-100 dark:text-zinc-900"
-                    : "border-zinc-300 text-zinc-900 hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-100 dark:hover:bg-zinc-900"
+      <div className="flex-1">
+        {step === 0 && (
+          <div className="flex flex-col gap-6">
+            <div>
+              <h2 className="font-display text-2xl text-text">How&apos;s your cooking?</h2>
+              <p className="mt-1 text-sm text-muted">This shapes the recipes we suggest.</p>
+            </div>
+            <div className="flex flex-col gap-3">
+              {COOKING_SKILLS.map((skill) => {
+                const Icon = skill.icon;
+                const isSelected = cookingSkill === skill.value;
+                return (
+                  <button
+                    key={skill.value}
+                    type="button"
+                    onClick={() => setCookingSkill(skill.value)}
+                    aria-pressed={isSelected}
+                    className={`flex w-full items-center gap-4 rounded-[var(--radius)] border p-4 text-left transition ${
+                      isSelected ? "border-amber bg-amber-light" : "border-border bg-surface"
+                    }`}
+                  >
+                    <Icon size={26} className={isSelected ? "text-amber" : "text-muted"} />
+                    <div>
+                      <p className="font-display text-lg font-medium text-text">{skill.label}</p>
+                      <p className="text-sm text-text-mid">{skill.description}</p>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {step === 1 && (
+          <div className="flex flex-col gap-6">
+            <div>
+              <h2 className="font-display text-2xl text-text">Any dietary restrictions?</h2>
+              <p className="mt-1 text-sm text-muted">Select any that apply.</p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={selectNone}
+                aria-pressed={noneSelected}
+                className={`rounded-full border px-4 py-2 text-sm font-medium transition ${
+                  noneSelected
+                    ? "border-amber bg-amber text-white"
+                    : "border-border bg-surface text-text-mid"
                 }`}
               >
-                <input
-                  type="checkbox"
-                  checked={checked}
-                  onChange={() => toggleDietaryOption(option)}
-                  className="hidden"
-                />
-                {option}
-              </label>
-            );
-          })}
-        </div>
-      </section>
+                None
+              </button>
+              {DIETARY_OPTIONS.map((option) => {
+                const isSelected = dietaryRestrictions.includes(option);
+                return (
+                  <button
+                    key={option}
+                    type="button"
+                    onClick={() => toggleDietaryOption(option)}
+                    aria-pressed={isSelected}
+                    className={`rounded-full border px-4 py-2 text-sm font-medium transition ${
+                      isSelected
+                        ? "border-amber bg-amber text-white"
+                        : "border-border bg-surface text-text-mid"
+                    }`}
+                  >
+                    {option}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
-      <section className="flex flex-col gap-4">
-        <div>
-          <h2 className="font-medium">Maximum cooking time</h2>
-          <p className="text-sm text-zinc-600 dark:text-zinc-400">
-            How long are you willing to spend on a weeknight meal?
-          </p>
-        </div>
-        <div className="flex overflow-hidden rounded-full border border-zinc-300 dark:border-zinc-700">
-          {COOKING_TIME_OPTIONS.map((option, index) => (
-            <button
-              key={option.value}
-              type="button"
-              onClick={() => setMaxCookingTime(option.value)}
-              aria-pressed={maxCookingTime === option.value}
-              className={`flex-1 px-4 py-2 text-sm font-medium transition ${
-                maxCookingTime === option.value
-                  ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900"
-                  : "bg-white text-zinc-900 hover:bg-zinc-50 dark:bg-zinc-950 dark:text-zinc-100 dark:hover:bg-zinc-900"
-              } ${index > 0 ? "border-l border-zinc-300 dark:border-zinc-700" : ""}`}
-            >
-              {option.label}
-            </button>
+        {step === 2 && (
+          <div className="flex flex-col gap-6">
+            <div>
+              <h2 className="font-display text-2xl text-text">How much time do you have?</h2>
+              <p className="mt-1 text-sm text-muted">For a typical weeknight meal.</p>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              {COOKING_TIME_OPTIONS.map((option) => {
+                const isSelected = maxCookingTime === option.value;
+                return (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() => setMaxCookingTime(option.value)}
+                    aria-pressed={isSelected}
+                    className={`rounded-[var(--radius)] border py-6 text-center text-lg font-medium transition ${
+                      isSelected
+                        ? "border-amber bg-amber-light text-amber"
+                        : "border-border bg-surface text-text-mid"
+                    }`}
+                  >
+                    {option.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {error && <p className="mt-4 text-sm text-urgent">{error}</p>}
+
+      <div className="mt-auto flex flex-col items-center gap-4 pt-10">
+        <div className="flex gap-2">
+          {Array.from({ length: STEP_COUNT }).map((_, index) => (
+            <span
+              key={index}
+              className={`h-2 w-2 rounded-full transition ${
+                index === step ? "bg-amber" : "bg-amber-muted"
+              }`}
+            />
           ))}
         </div>
-      </section>
-
-      {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
-
-      <button
-        type="submit"
-        disabled={!canSubmit}
-        className="self-start rounded-full bg-zinc-900 px-6 py-2.5 text-sm font-medium text-white transition hover:bg-zinc-700 disabled:pointer-events-none disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
-      >
-        {isSubmitting ? "Saving…" : "Get started"}
-      </button>
-    </form>
+        <button
+          type="button"
+          onClick={handleNext}
+          disabled={!canProceed || isSubmitting}
+          className="flex h-12 w-full items-center justify-center rounded-[var(--radius)] bg-amber text-base font-semibold text-white transition disabled:pointer-events-none disabled:opacity-50"
+        >
+          {step === STEP_COUNT - 1 ? (isSubmitting ? "Saving…" : "Get started") : "Next"}
+        </button>
+      </div>
+    </div>
   );
 }
