@@ -10,3 +10,8 @@ __pycache__/
 # env files (can opt-in for committing if needed)
 .env
 !.env.example
+
+# OS / editor cruft
+.DS_Store
+.Rhistory
+database/.DS_Store
