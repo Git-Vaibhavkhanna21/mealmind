@@ -4,6 +4,72 @@
 
 MealMind turns a photo of a grocery receipt into a running pantry inventory, then uses that inventory to recommend meals that prioritize ingredients close to expiring. It combines a deterministic parsing/tracking pipeline with LLM agents for the steps that require judgment — reading messy receipt text, estimating shelf life, and ranking recipes against what's actually in the kitchen. The end result is a shopping list generated from pantry state, cooking history, and preferences — replenishing what's running low, complementing what's already on hand, or re-enabling a dish the user has cooked before — closing the loop from "what did I buy" to "what should I cook" to "what do I need next."
 
+### System architecture
+
+```mermaid
+flowchart TD
+    Browser["Browser"]
+    Vercel["Vercel\nNext.js Frontend + API Routes"]
+    Railway["Railway\nFastAPI Service (api/main.py)"]
+    Anthropic["Anthropic API\nHaiku (parsing) + Sonnet (reasoning)"]
+    OpenAI["OpenAI API\nEmbeddings"]
+    Supabase[(Supabase\nPostgreSQL + pgvector)]
+    MealDB["TheMealDB\n(external recipe API)"]
+    RecipeMCP["Recipe MCP Server\n(api/mcp_servers/recipe_database.py)"]
+    GoogleOAuth["Google OAuth"]
+    SupabaseAuth["Supabase Auth"]
+
+    Browser -->|HTTPS| Vercel
+    Vercel -->|"HTTP, X-Internal-Api-Key header"| Railway
+    Railway -->|Messages API calls| Anthropic
+    Railway -->|embeddings.create| OpenAI
+    Railway -->|"SQL queries (asyncpg/postgrest)"| Supabase
+    MealDB -->|"REST, recipe ingestion"| RecipeMCP
+    RecipeMCP -->|"upsert recipes + embeddings"| Supabase
+    Browser -->|OAuth redirect| GoogleOAuth
+    GoogleOAuth -->|"OAuth token exchange"| SupabaseAuth
+    SupabaseAuth -->|"session cookie"| Vercel
+    SupabaseAuth -.->|shares Postgres instance| Supabase
+```
+
+Some Next.js API routes are plain CRUD against Supabase directly (auth-scoped via row-level security) and don't traverse the FastAPI hop shown above — see `frontend/lib/python-api.ts` for which routes call out to Railway versus talk to Supabase directly.
+
+### Receipt-to-pantry data flow
+
+```mermaid
+sequenceDiagram
+    actor User
+    participant Frontend as Frontend (Next.js)
+    participant API as FastAPI (Railway)
+    participant Parsing as Receipt Parsing Workflow
+    participant Haiku
+    participant Expiration as Expiration Workflow
+    participant Subagent as Haiku/Sonnet Subagent
+    participant PantryMCP as Pantry MCP Server
+    participant Supabase
+
+    User->>Frontend: Upload receipt (photo / PDF / text)
+    Frontend->>API: POST /parse-receipt (X-Internal-Api-Key)
+    API->>Parsing: dispatch receipt payload
+    Parsing->>Haiku: extract items (vision or text)
+    Haiku-->>Parsing: normalized (name, quantity, unit) records
+    Parsing->>Expiration: request expiry estimates
+    Expiration->>Haiku: batch expiry estimate call
+    Haiku-->>Expiration: estimates + confidence
+    alt low confidence on an item
+        Expiration->>Subagent: reason through single item
+        Subagent-->>Expiration: best-effort expiry date
+    end
+    Expiration-->>Parsing: expiry_date per item
+    Parsing->>PantryMCP: upsert_item(name, quantity, unit, expiry_date)
+    PantryMCP->>Supabase: INSERT/UPDATE pantry_items
+    Supabase-->>PantryMCP: written rows
+    PantryMCP-->>Parsing: confirmation
+    Parsing-->>API: parsed items + status
+    API-->>Frontend: 200 OK, items JSON
+    Frontend-->>User: updated pantry view
+```
+
 ## Architecture
 
 ### Workflows vs. agents
