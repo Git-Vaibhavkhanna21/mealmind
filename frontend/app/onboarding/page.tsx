@@ -13,14 +13,11 @@ export default async function OnboardingPage() {
   }
 
   return (
-    <main className="flex flex-1 flex-col items-center gap-8 p-8 sm:p-16">
-      <div className="text-center">
-        <h1 className="text-2xl font-semibold tracking-tight">Welcome to MealMind</h1>
-        <p className="mt-1 max-w-md text-zinc-600 dark:text-zinc-400">
-          A few quick questions so we can tailor recommendations to you.
-        </p>
+    <main className="flex min-h-screen flex-1 flex-col bg-bg px-6 pt-10 pb-8">
+      <h1 className="font-display text-center text-2xl text-amber">MealMind</h1>
+      <div className="mt-8 flex flex-1 flex-col">
+        <OnboardingClient />
       </div>
-      <OnboardingClient />
     </main>
   );
 }
