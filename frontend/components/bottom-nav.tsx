@@ -2,12 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ChefHat, ShoppingBasket, ShoppingCart } from "lucide-react";
+import { ChefHat, Settings, ShoppingBasket, ShoppingCart } from "lucide-react";
 
 const TABS = [
   { href: "/pantry", label: "Pantry", icon: ShoppingBasket },
   { href: "/recipes", label: "Recipes", icon: ChefHat },
   { href: "/shopping-list", label: "Shopping", icon: ShoppingCart },
+  { href: "/settings", label: "Settings", icon: Settings },
 ];
 
 // Same routes the old top nav hid itself on — a signed-out landing page and
