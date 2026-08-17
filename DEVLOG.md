@@ -181,5 +181,25 @@ The new `bottom-nav.tsx` initially shipped without a Sign Out control, and the o
 ### Bugs found and fixed
 None — the design-token risk area (whether arbitrary `@theme inline` keys actually generate Tailwind utilities) was verified directly against compiled CSS before considering it settled, rather than discovered as a bug afterward.
 
+## PR #21 — Pantry page redesign — urgency sections, category groups, and card layout
+### What was built
+A ground-up redesign of the pantry screen, the app's most-used page. `app/pantry/page.tsx` now computes total item count and an "expiring soon" count server-side and renders a new header (`My Pantry` in Lora 28px with a muted count subtitle). `components/pantry-client.tsx` buckets items into three urgency sections rendered in a fixed order — "Use Soon" (≤7 days, amber-tinted `bg-amber-light` background, a count badge next to the title, sorted most-urgent-first), "This Month" (8–30 days, normal surface background), and "Well Stocked" (>30 days or no expiry date, collapsed by default behind a chevron toggle). Within every section, items are further grouped into category subsections — Proteins, Produce, Dairy, Grains and Pantry, Other — detected from the item name via simple ordered keyword matching, each with a small-caps category label above a two-column card grid. Each `ItemCard` shows the name, quantity/unit, and an expiry badge at the bottom (red for <3 days, amber for 3–7 days, green with a formatted date beyond that); tapping a card expands it inline into a quantity edit form with Save and Mark as Depleted actions. The old inline upload card was replaced with a 56px amber floating action button (fixed, bottom: 84px so it clears the bottom nav, right: 20px) that opens a bottom sheet with three full-width options — Take Photo, Choose from Library, Type Manually — matching the existing `/api/parse-receipt` flow. An empty state (Lucide `Refrigerator` icon, Lora headline, DM Sans subtext, large amber CTA) replaces the page when there are no pantry items.
+
+### Architectural decisions
+The three literal badge cases in the spec ("red", "amber", "green" for positive day counts) don't cover real pantry data, which includes items with no `expiry_date` and already-expired items. Extended the badge logic to a green "No expiry date" state and a distinct "Expired" / "Expires today" state for zero/negative day counts, rather than letting those items render a nonsensical or blank badge.
+
+The design system (PR #20) has no literal "red" token — only `--urgent`/`--urgent-light` (semantically "most critical," despite sharing amber's hex value) and `--warning`/`--warning-light` (a distinct gold). Mapped the <3-day tier to `--urgent` and the 3–7-day tier to `--warning` rather than `--amber-light`, specifically so the badge in the "Use Soon" section doesn't visually blend into that section's own amber-tinted background.
+
+Chose Lucide's `Refrigerator` icon for the empty-state illustration instead of a hand-drawn SVG — it satisfies "simple SVG of a fridge outline" directly and stays consistent with the rest of the icon system rather than introducing a one-off asset.
+
+Kept the "Choose from Library" file input accepting `image/*,application/pdf` (unchanged from the prior upload flow) even though the bottom-sheet spec only names photo/library/manual entry — the backend's `/api/parse-receipt` already handles PDF receipts through the same field, and restricting it would have silently dropped existing functionality outside this PR's stated scope.
+
+### Bugs found and fixed
+Self-caught during review of the first draft, before typecheck/lint: a dead, unused `CategoryGroups` function left over from an earlier drafting pass contained a bug that permanently hardcoded `isExpanded` to `false` (`cardProps.editQuantity !== undefined && false`); it was never called, superseded by `CategoryGroupsForItems`, and was deleted along with an awkward `itemCardPropsPlaceholder()` stub that only existed to smuggle a prop type via `ReturnType<...>` — replaced with a proper named `ItemCardProps` type.
+
+`handleTextSubmit` closed the "Type Manually" bottom sheet unconditionally after calling `submitFormData`, including on failure — a failed submission silently discarded the user's typed input and hid the retry opportunity behind a closed sheet. Fixed by having `submitFormData` return a `Promise<boolean>` success flag and only closing the sheet when it resolves `true`.
+
+ESLint flagged an unused `today` prop being threaded through `CategoryGroupsForItems` — urgency/expiry computation happens in `cardPropsFor` in the parent, which already closes over `today`, so the prop was dead weight; removed it from the component and all three call sites.
+
 ## How this log is maintained
 CLAUDE.md instructs Claude Code to update this file at the end of every PR before the final commit. Each entry documents what was built, architectural decisions and reasoning, and bugs found and fixed. Written for a technical interviewer reading the public repository.
