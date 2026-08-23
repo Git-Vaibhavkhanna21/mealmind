@@ -38,11 +38,22 @@ def estimate_expirations(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
         estimate = estimates_by_name.get(item["name"])
         if estimate is not None and estimate.get("confidence") == "high" and estimate.get("expiry_date"):
             expiry_date = estimate["expiry_date"]
+            expiry_source = "haiku"
+            expiry_confidence = estimate.get("confidence")
         else:
             subagent_result = expiration.estimate_with_subagent(item, today)
             expiry_date = subagent_result.get("expiry_date")
+            expiry_source = "sonnet"
+            expiry_confidence = estimate.get("confidence") if estimate is not None else None
 
-        enriched.append({**item, "expiry_date": expiry_date})
+        enriched.append(
+            {
+                **item,
+                "expiry_date": expiry_date,
+                "expiry_source": expiry_source,
+                "expiry_confidence": expiry_confidence,
+            }
+        )
 
     return enriched
 

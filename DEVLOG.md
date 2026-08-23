@@ -224,5 +224,15 @@ The audit confirmed no secrets were ever committed — `.env`, `.mcp.json`, and 
 ### Bugs found and fixed
 None new — every fix in this PR addresses an issue the audit itself found (see What was built); no additional bugs surfaced while making these changes.
 
+## PR #24 — Add expiry_source and expiry_confidence fields to expiration workflow output
+### What was built
+`api/workflows/expiration_workflow.py`'s `estimate_expirations` now returns two additional fields per item: `expiry_source` (`"haiku"` or `"sonnet"`, which model's estimate the `expiry_date` came from) and `expiry_confidence` (the confidence Haiku's batch call reported for that item — `"high"`/`"low"` — or `None` if the item had no Haiku estimate to report, e.g. a name mismatch between the batch response and the input). No routing logic changed; both fields are read off values the function already had in scope and attached to the same `enriched.append(...)` call that already existed.
+
+### Architectural decisions
+The task originally specified `expiry_confidence` as a float. Checked `api/agents/expiration.py`'s actual prompt and response contract before implementing — Haiku is instructed to report confidence as one of exactly two strings, `"high"` or `"low"`, never a numeric score, so there was no real float value anywhere in the pipeline to store. Flagged this before writing any code rather than either building a type that doesn't match reality or inventing an arbitrary high→0.9/low→0.4-style mapping that would look like real model output but wasn't; confirmed with the requester to store Haiku's actual string value as-is.
+
+### Bugs found and fixed
+None — verified the three reachable cases (high-confidence Haiku result, low-confidence Haiku result escalated to Sonnet, and a name that never matched a Haiku estimate at all) against a mocked run of `estimate_expirations` before committing, confirming `expiry_source`/`expiry_confidence` come out correct in each: `("haiku", "high")`, `("sonnet", "low")`, and `("sonnet", None)` respectively. Also confirmed the new keys don't reach Supabase: `api/mcp_servers/pantry_inventory.py`'s `upsert_items` explicitly whitelists which fields it inserts (`name`, `quantity`, `unit`, `purchase_date`, `expiry_date`), so the two new keys pass through the workflow's return value only and never risk an unknown-column error against the `pantry_items` table.
+
 ## How this log is maintained
 CLAUDE.md instructs Claude Code to update this file at the end of every PR before the final commit. Each entry documents what was built, architectural decisions and reasoning, and bugs found and fixed. Written for a technical interviewer reading the public repository.
