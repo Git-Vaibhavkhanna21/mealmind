@@ -1,0 +1,159 @@
+[
+  {
+    "id": 1,
+    "pantry": [
+      { "name": "chicken breast", "quantity": 1, "unit": "kg", "is_depleted": false },
+      { "name": "eggs", "quantity": 12, "unit": null, "is_depleted": false },
+      { "name": "milk", "quantity": 2, "unit": "L", "is_depleted": false }
+    ],
+    "recent_history": [
+      {
+        "recipe_name": "Chickpea chorizo and spinach stew",
+        "ingredients_used": ["spinach", "chickpeas", "chorizo"]
+      }
+    ],
+    "preferences": {
+      "cooking_skill": "intermediate",
+      "dietary_restrictions": [],
+      "max_cooking_time_minutes": 30
+    },
+    "rubric_weights": {
+      "rationale_specificity": 1,
+      "replenishment_accuracy": 1,
+      "complementarity": 1,
+      "novelty_balance": 1,
+      "no_duplicate_stocking": 1
+    },
+    "notes": "Spinach, chickpeas, chorizo all used and not in pantry — expect replenishment of all three"
+  },
+  {
+    "id": 2,
+    "pantry": [
+      { "name": "eggs", "quantity": 12, "unit": null, "is_depleted": false },
+      { "name": "milk", "quantity": 2, "unit": "L", "is_depleted": false },
+      { "name": "butter", "quantity": 200, "unit": "g", "is_depleted": false }
+    ],
+    "recent_history": [],
+    "preferences": {
+      "cooking_skill": "beginner",
+      "dietary_restrictions": [],
+      "max_cooking_time_minutes": 20
+    },
+    "rubric_weights": {
+      "rationale_specificity": 1,
+      "replenishment_accuracy": 1,
+      "complementarity": 1,
+      "novelty_balance": 1,
+      "no_duplicate_stocking": 1
+    },
+    "notes": "No history — suggestions must be based on pantry complementarity only"
+  },
+  {
+    "id": 3,
+    "pantry": [
+      { "name": "chicken breast", "quantity": 1, "unit": "kg", "is_depleted": false },
+      { "name": "eggs", "quantity": 12, "unit": null, "is_depleted": false },
+      { "name": "milk", "quantity": 2, "unit": "L", "is_depleted": false },
+      { "name": "butter", "quantity": 200, "unit": "g", "is_depleted": false },
+      { "name": "pasta", "quantity": 500, "unit": "g", "is_depleted": false },
+      { "name": "rice", "quantity": 1, "unit": "kg", "is_depleted": false },
+      { "name": "onion", "quantity": 3, "unit": null, "is_depleted": false },
+      { "name": "garlic", "quantity": 2, "unit": "bulb", "is_depleted": false },
+      { "name": "cheddar cheese", "quantity": 200, "unit": "g", "is_depleted": false },
+      { "name": "greek yogurt", "quantity": 500, "unit": "g", "is_depleted": false },
+      { "name": "spinach", "quantity": 200, "unit": "g", "is_depleted": false },
+      { "name": "broccoli", "quantity": 300, "unit": "g", "is_depleted": false },
+      { "name": "carrots", "quantity": 4, "unit": null, "is_depleted": false },
+      { "name": "potatoes", "quantity": 6, "unit": null, "is_depleted": false },
+      { "name": "oats", "quantity": 500, "unit": "g", "is_depleted": false }
+    ],
+    "recent_history": [
+      {
+        "recipe_name": "Chicken pasta",
+        "ingredients_used": ["chicken breast", "pasta", "garlic"]
+      },
+      {
+        "recipe_name": "Egg fried rice",
+        "ingredients_used": ["eggs", "rice", "garlic"]
+      },
+      {
+        "recipe_name": "Broccoli stir fry",
+        "ingredients_used": ["broccoli", "garlic", "soy sauce"]
+      }
+    ],
+    "preferences": {
+      "cooking_skill": "intermediate",
+      "dietary_restrictions": [],
+      "max_cooking_time_minutes": 30
+    },
+    "rubric_weights": {
+      "rationale_specificity": 1,
+      "replenishment_accuracy": 1,
+      "complementarity": 1,
+      "novelty_balance": 1,
+      "no_duplicate_stocking": 1
+    },
+    "notes": "Full pantry — should suggest novel ingredients not already well-stocked, not replenishment"
+  },
+  {
+    "id": 4,
+    "pantry": [
+      { "name": "garlic", "quantity": 1, "unit": "bulb", "is_depleted": false },
+      { "name": "onion", "quantity": 1, "unit": null, "is_depleted": false }
+    ],
+    "recent_history": [
+      {
+        "recipe_name": "Pasta bolognese",
+        "ingredients_used": ["pasta", "ground beef", "passata", "onion", "garlic"]
+      }
+    ],
+    "preferences": {
+      "cooking_skill": "intermediate",
+      "dietary_restrictions": [],
+      "max_cooking_time_minutes": 45
+    },
+    "rubric_weights": {
+      "rationale_specificity": 1,
+      "replenishment_accuracy": 1,
+      "complementarity": 1,
+      "novelty_balance": 1,
+      "no_duplicate_stocking": 1
+    },
+    "notes": "Nearly empty pantry after cooking — pasta and ground beef should appear as priority replenishment"
+  },
+  {
+    "id": 5,
+    "pantry": [
+      { "name": "chicken breast", "quantity": 200, "unit": "g", "is_depleted": false },
+      { "name": "eggs", "quantity": 12, "unit": null, "is_depleted": false },
+      { "name": "spinach", "quantity": 0, "unit": "g", "is_depleted": true }
+    ],
+    "recent_history": [
+      {
+        "recipe_name": "Chicken stir fry",
+        "ingredients_used": ["chicken breast", "spinach", "soy sauce"]
+      },
+      {
+        "recipe_name": "Chicken curry",
+        "ingredients_used": ["chicken breast", "coconut milk", "curry paste"]
+      },
+      {
+        "recipe_name": "Chicken salad",
+        "ingredients_used": ["chicken breast", "spinach", "lemon"]
+      }
+    ],
+    "preferences": {
+      "cooking_skill": "intermediate",
+      "dietary_restrictions": [],
+      "max_cooking_time_minutes": 30
+    },
+    "rubric_weights": {
+      "rationale_specificity": 1,
+      "replenishment_accuracy": 1,
+      "complementarity": 1,
+      "novelty_balance": 1,
+      "no_duplicate_stocking": 1
+    },
+    "notes": "Chicken almost depleted, spinach depleted — expect chicken and spinach replenishment, plus variety beyond chicken given heavy recent history"
+  }
+]

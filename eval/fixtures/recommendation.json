@@ -1,0 +1,231 @@
+[
+  {
+    "id": 1,
+    "pantry": [
+      { "name": "chicken breast", "days_until_expiry": 2 },
+      { "name": "spinach", "days_until_expiry": 5 },
+      { "name": "eggs", "days_until_expiry": 30 },
+      { "name": "milk", "days_until_expiry": 7 }
+    ],
+    "preferences": {
+      "cooking_skill": "intermediate",
+      "dietary_restrictions": [],
+      "max_cooking_time_minutes": 30
+    },
+    "rubric_weights": {
+      "expiry_urgency": 1,
+      "dietary_compliance": 1,
+      "time_compliance": 1,
+      "rationale_specificity": 1,
+      "recipe_diversity": 1,
+      "real_recipe_ids": 1
+    },
+    "notes": "Baseline — chicken and spinach should appear given urgency"
+  },
+  {
+    "id": 2,
+    "pantry": [
+      { "name": "salmon fillet", "days_until_expiry": 1 },
+      { "name": "broccoli", "days_until_expiry": 4 },
+      { "name": "jasmine rice", "days_until_expiry": 365 }
+    ],
+    "preferences": {
+      "cooking_skill": "beginner",
+      "dietary_restrictions": [],
+      "max_cooking_time_minutes": 20
+    },
+    "rubric_weights": {
+      "expiry_urgency": 1,
+      "dietary_compliance": 1,
+      "time_compliance": 1,
+      "rationale_specificity": 1,
+      "recipe_diversity": 1,
+      "real_recipe_ids": 1
+    },
+    "notes": "Salmon extreme urgency, beginner-appropriate recipes only"
+  },
+  {
+    "id": 3,
+    "pantry": [
+      { "name": "chicken breast", "days_until_expiry": 3 },
+      { "name": "greek yogurt", "days_until_expiry": 14 },
+      { "name": "cucumber", "days_until_expiry": 5 },
+      { "name": "garlic", "days_until_expiry": 90 }
+    ],
+    "preferences": {
+      "cooking_skill": "intermediate",
+      "dietary_restrictions": ["dairy-free"],
+      "max_cooking_time_minutes": 30
+    },
+    "rubric_weights": {
+      "expiry_urgency": 1,
+      "dietary_compliance": 1,
+      "time_compliance": 1,
+      "rationale_specificity": 1,
+      "recipe_diversity": 1,
+      "real_recipe_ids": 1
+    },
+    "notes": "No dairy restriction — yogurt must not appear in recipe ingredients"
+  },
+  {
+    "id": 4,
+    "pantry": [
+      { "name": "eggs", "days_until_expiry": 21 },
+      { "name": "cheddar cheese", "days_until_expiry": 30 },
+      { "name": "milk", "days_until_expiry": 5 },
+      { "name": "butter", "days_until_expiry": 60 }
+    ],
+    "preferences": {
+      "cooking_skill": "beginner",
+      "dietary_restrictions": ["vegetarian"],
+      "max_cooking_time_minutes": 20
+    },
+    "rubric_weights": {
+      "expiry_urgency": 1,
+      "dietary_compliance": 1,
+      "time_compliance": 1,
+      "rationale_specificity": 1,
+      "recipe_diversity": 1,
+      "real_recipe_ids": 1
+    },
+    "notes": "Vegetarian plus dairy-heavy pantry, fast recipes"
+  },
+  {
+    "id": 5,
+    "pantry": [
+      { "name": "ground beef", "days_until_expiry": 1 },
+      { "name": "onion", "days_until_expiry": 30 },
+      { "name": "garlic", "days_until_expiry": 90 },
+      { "name": "pasta", "days_until_expiry": 365 },
+      { "name": "passata", "days_until_expiry": 180 }
+    ],
+    "preferences": {
+      "cooking_skill": "intermediate",
+      "dietary_restrictions": [],
+      "max_cooking_time_minutes": 45
+    },
+    "rubric_weights": {
+      "expiry_urgency": 1,
+      "dietary_compliance": 1,
+      "time_compliance": 1,
+      "rationale_specificity": 1,
+      "recipe_diversity": 1,
+      "real_recipe_ids": 1
+    },
+    "notes": "Ground beef extreme urgency — must appear in at least one recipe"
+  },
+  {
+    "id": 6,
+    "pantry": [
+      { "name": "rolled oats", "days_until_expiry": 365 },
+      { "name": "banana", "days_until_expiry": 3 },
+      { "name": "almond milk", "days_until_expiry": 7 },
+      { "name": "chia seeds", "days_until_expiry": 365 }
+    ],
+    "preferences": {
+      "cooking_skill": "beginner",
+      "dietary_restrictions": ["vegan"],
+      "max_cooking_time_minutes": 15
+    },
+    "rubric_weights": {
+      "expiry_urgency": 1,
+      "dietary_compliance": 1,
+      "time_compliance": 1,
+      "rationale_specificity": 1,
+      "recipe_diversity": 1,
+      "real_recipe_ids": 1
+    },
+    "notes": "Vegan plus fast plus breakfast items — banana urgency"
+  },
+  {
+    "id": 7,
+    "pantry": [
+      { "name": "chicken thighs", "days_until_expiry": 2 },
+      { "name": "coconut milk", "days_until_expiry": 5 },
+      { "name": "red curry paste", "days_until_expiry": 60 },
+      { "name": "jasmine rice", "days_until_expiry": 365 }
+    ],
+    "preferences": {
+      "cooking_skill": "advanced",
+      "dietary_restrictions": [],
+      "max_cooking_time_minutes": 60
+    },
+    "rubric_weights": {
+      "expiry_urgency": 1,
+      "dietary_compliance": 1,
+      "time_compliance": 1,
+      "rationale_specificity": 1,
+      "recipe_diversity": 1,
+      "real_recipe_ids": 1
+    },
+    "notes": "Advanced user, full 60 minutes, Asian cuisine likely"
+  },
+  {
+    "id": 8,
+    "pantry": [
+      { "name": "carrots", "days_until_expiry": 14 },
+      { "name": "potatoes", "days_until_expiry": 21 },
+      { "name": "onion", "days_until_expiry": 30 },
+      { "name": "garlic", "days_until_expiry": 90 }
+    ],
+    "preferences": {
+      "cooking_skill": "intermediate",
+      "dietary_restrictions": ["vegan"],
+      "max_cooking_time_minutes": 30
+    },
+    "rubric_weights": {
+      "expiry_urgency": 1,
+      "dietary_compliance": 1,
+      "time_compliance": 1,
+      "rationale_specificity": 1,
+      "recipe_diversity": 1,
+      "real_recipe_ids": 1
+    },
+    "notes": "Veg-only pantry — tests whether agent handles no protein gracefully"
+  },
+  {
+    "id": 9,
+    "pantry": [
+      { "name": "chicken breast", "days_until_expiry": 2 },
+      { "name": "spinach", "days_until_expiry": 5 },
+      { "name": "eggs", "days_until_expiry": 30 },
+      { "name": "milk", "days_until_expiry": 7 }
+    ],
+    "preferences": {
+      "cooking_skill": "intermediate",
+      "dietary_restrictions": [],
+      "max_cooking_time_minutes": 30
+    },
+    "rubric_weights": {
+      "expiry_urgency": 1,
+      "dietary_compliance": 1,
+      "time_compliance": 1,
+      "rationale_specificity": 1,
+      "recipe_diversity": 1,
+      "real_recipe_ids": 1
+    },
+    "notes": "Intentional repeat of case 1 — regression test for consistency across runs, same input should produce similar scores"
+  },
+  {
+    "id": 10,
+    "pantry": [
+      { "name": "salmon fillet", "days_until_expiry": 1 },
+      { "name": "ground beef", "days_until_expiry": 1 },
+      { "name": "chicken breast", "days_until_expiry": 2 }
+    ],
+    "preferences": {
+      "cooking_skill": "intermediate",
+      "dietary_restrictions": [],
+      "max_cooking_time_minutes": 30
+    },
+    "rubric_weights": {
+      "expiry_urgency": 1,
+      "dietary_compliance": 1,
+      "time_compliance": 1,
+      "rationale_specificity": 1,
+      "recipe_diversity": 1,
+      "real_recipe_ids": 1
+    },
+    "notes": "Multiple urgent items — does the agent surface all three or collapse onto one protein?"
+  }
+]

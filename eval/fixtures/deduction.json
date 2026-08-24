@@ -1,0 +1,16 @@
+[
+  { "id": 1, "recipe_ingredient": "fresh spinach", "pantry_item": "spinach 200g", "expected_match": true, "expected_confidence": "high", "notes": "Direct match with qualifier" },
+  { "id": 2, "recipe_ingredient": "chicken breasts", "pantry_item": "chicken breast 1kg", "expected_match": true, "expected_confidence": "high", "notes": "Plural to singular" },
+  { "id": 3, "recipe_ingredient": "whole milk", "pantry_item": "milk 2L", "expected_match": true, "expected_confidence": "high", "notes": "Qualifier stripped" },
+  { "id": 4, "recipe_ingredient": "free range eggs", "pantry_item": "eggs 12", "expected_match": true, "expected_confidence": "high", "notes": "Production qualifier stripped" },
+  { "id": 5, "recipe_ingredient": "Greek yoghurt", "pantry_item": "greek yogurt 500g", "expected_match": true, "expected_confidence": "high", "notes": "UK/US spelling variant — yoghurt vs yogurt" },
+  { "id": 6, "recipe_ingredient": "natural yogurt", "pantry_item": "greek yogurt 500g", "expected_match": false, "expected_confidence": "high", "notes": "Different product — natural and Greek yogurt differ significantly in fat content and culinary use" },
+  { "id": 7, "recipe_ingredient": "vegetable oil", "pantry_item": null, "expected_match": false, "expected_confidence": "high", "notes": "Item not in pantry — correct no-match" },
+  { "id": 8, "recipe_ingredient": "spring onions", "pantry_item": "red onion 1", "expected_match": false, "expected_confidence": "high", "notes": "Different type of onion — not interchangeable" },
+  { "id": 9, "recipe_ingredient": "coriander", "pantry_item": "fresh coriander bunch", "expected_match": true, "expected_confidence": "high", "notes": "Base name match with descriptor" },
+  { "id": 10, "recipe_ingredient": "salmon fillets", "pantry_item": "salmon fillet 200g", "expected_match": true, "expected_confidence": "high", "notes": "Plural to singular" },
+  { "id": 11, "recipe_ingredient": "butter", "pantry_item": "unsalted butter 200g", "expected_match": true, "expected_confidence": "high", "notes": "Qualifier stripped" },
+  { "id": 13, "recipe_ingredient": "parmesan cheese", "pantry_item": "cheddar cheese 200g", "expected_match": false, "expected_confidence": "high", "notes": "Different cheese — not interchangeable" },
+  { "id": 14, "recipe_ingredient": "minced beef", "pantry_item": "ground beef 500g", "expected_match": true, "expected_confidence": "high", "notes": "UK/US terminology equivalence" },
+  { "id": 15, "recipe_ingredient": "capsicum", "pantry_item": "bell pepper 2", "expected_match": true, "expected_confidence": "high", "notes": "Regional name variant — capsicum is bell pepper in Australian/NZ English" }
+]

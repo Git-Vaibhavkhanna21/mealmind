@@ -1,0 +1,155 @@
+[
+  {
+    "id": 1,
+    "input": "chicken breast 1kg, spinach 200g, eggs 12, milk 2L",
+    "expected_items": [
+      { "name": "chicken breast", "quantity": 1, "unit": "kg" },
+      { "name": "spinach", "quantity": 200, "unit": "g" },
+      { "name": "eggs", "quantity": 12, "unit": null },
+      { "name": "milk", "quantity": 2, "unit": "L" }
+    ]
+  },
+  {
+    "id": 2,
+    "input": "2 x greek yogurt 500g, 1 x sourdough bread, 6 bananas",
+    "expected_items": [
+      { "name": "greek yogurt", "quantity": 500, "unit": "g" },
+      { "name": "greek yogurt", "quantity": 500, "unit": "g" },
+      { "name": "sourdough bread", "quantity": 1, "unit": null },
+      { "name": "bananas", "quantity": 6, "unit": null }
+    ],
+    "notes": "2 x greek yogurt 500g expands into two separate 500g line items, not one 1000g item."
+  },
+  {
+    "id": 3,
+    "input": "salmon fillet, broccoli florets, jasmine rice 1lb, unsalted butter",
+    "expected_items": [
+      { "name": "salmon fillet", "quantity": 1, "unit": null },
+      { "name": "broccoli", "quantity": 1, "unit": null },
+      { "name": "jasmine rice", "quantity": 1, "unit": "lb" },
+      { "name": "butter", "quantity": 1, "unit": null }
+    ]
+  },
+  {
+    "id": 4,
+    "input": "3 x free range eggs (box of 6), whole milk 4 pints",
+    "expected_items": [
+      { "name": "eggs", "quantity": 18, "unit": null },
+      { "name": "whole milk", "quantity": 4, "unit": "pint" }
+    ],
+    "notes": "3 boxes of 6 eggs multiplies out to 18."
+  },
+  {
+    "id": 5,
+    "input": "organic baby spinach 142g, cherry tomatoes, mozzarella di bufala 125g, fresh basil",
+    "expected_items": [
+      { "name": "baby spinach", "quantity": 142, "unit": "g" },
+      { "name": "cherry tomatoes", "quantity": 1, "unit": null },
+      { "name": "mozzarella", "quantity": 125, "unit": "g" },
+      { "name": "fresh basil", "quantity": 1, "unit": null }
+    ]
+  },
+  {
+    "id": 6,
+    "input": "avocados x4, lime juice 250ml, red onion, jalapeño, coriander, tortilla chips 200g",
+    "expected_items": [
+      { "name": "avocados", "quantity": 4, "unit": null },
+      { "name": "lime juice", "quantity": 250, "unit": "ml" },
+      { "name": "red onion", "quantity": 1, "unit": null },
+      { "name": "jalapeño", "quantity": 1, "unit": null },
+      { "name": "coriander", "quantity": 1, "unit": null },
+      { "name": "tortilla chips", "quantity": 200, "unit": "g" }
+    ]
+  },
+  {
+    "id": 7,
+    "input": "oat milk 1L, rolled oats 500g, frozen blueberries 300g, chia seeds 200g, maple syrup",
+    "expected_items": [
+      { "name": "oat milk", "quantity": 1, "unit": "L" },
+      { "name": "rolled oats", "quantity": 500, "unit": "g" },
+      { "name": "frozen blueberries", "quantity": 300, "unit": "g" },
+      { "name": "chia seeds", "quantity": 200, "unit": "g" },
+      { "name": "maple syrup", "quantity": 1, "unit": null }
+    ]
+  },
+  {
+    "id": 8,
+    "input": "ribeye steak 400g, garlic 1 bulb, rosemary, thyme, unsalted butter 200g",
+    "expected_items": [
+      { "name": "ribeye steak", "quantity": 400, "unit": "g" },
+      { "name": "garlic", "quantity": 1, "unit": "bulb" },
+      { "name": "rosemary", "quantity": 1, "unit": null },
+      { "name": "thyme", "quantity": 1, "unit": null },
+      { "name": "butter", "quantity": 200, "unit": "g" }
+    ]
+  },
+  {
+    "id": 9,
+    "input": "I bought some chicken and a few vegetables including carrots and potatoes",
+    "expected_items": [
+      { "name": "chicken", "quantity": 1, "unit": null },
+      { "name": "carrots", "quantity": 1, "unit": null },
+      { "name": "potatoes", "quantity": 1, "unit": null }
+    ],
+    "notes": "Free-form sentence input, not a structured receipt line. Tests extraction from natural language."
+  },
+  {
+    "id": 10,
+    "input": "Nandos Peri Peri Sauce, Philadelphia Cream Cheese 180g, Warburtons Seeded Batch Loaf",
+    "expected_items": [
+      { "name": "peri peri sauce", "quantity": 1, "unit": null },
+      { "name": "cream cheese", "quantity": 180, "unit": "g" },
+      { "name": "seeded bread", "quantity": 1, "unit": null }
+    ],
+    "notes": "Brand names (Nandos, Philadelphia, Warburtons) must be stripped from the normalized item name."
+  },
+  {
+    "id": 11,
+    "input": "pasta 500g, passata 680g, ground beef 500g, onion, garlic, Italian herbs, parmesan",
+    "expected_items": [
+      { "name": "pasta", "quantity": 500, "unit": "g" },
+      { "name": "passata", "quantity": 680, "unit": "g" },
+      { "name": "ground beef", "quantity": 500, "unit": "g" },
+      { "name": "onion", "quantity": 1, "unit": null },
+      { "name": "garlic", "quantity": 1, "unit": null },
+      { "name": "Italian herbs", "quantity": 1, "unit": null },
+      { "name": "parmesan", "quantity": 1, "unit": null }
+    ]
+  },
+  {
+    "id": 12,
+    "input": "coconut milk 400ml, red curry paste, chicken thighs 600g, bell peppers, fish sauce, Thai basil",
+    "expected_items": [
+      { "name": "coconut milk", "quantity": 400, "unit": "ml" },
+      { "name": "red curry paste", "quantity": 1, "unit": null },
+      { "name": "chicken thighs", "quantity": 600, "unit": "g" },
+      { "name": "bell peppers", "quantity": 1, "unit": null },
+      { "name": "fish sauce", "quantity": 1, "unit": null },
+      { "name": "Thai basil", "quantity": 1, "unit": null }
+    ]
+  },
+  {
+    "id": 13,
+    "input": "",
+    "expected_items": [],
+    "notes": "Empty input must return an empty list, not an error."
+  },
+  {
+    "id": 14,
+    "input": "water",
+    "expected_items": [
+      { "name": "water", "quantity": 1, "unit": null }
+    ]
+  },
+  {
+    "id": 15,
+    "input": "dozen eggs, half gallon milk, pound of ground turkey, bunch of kale",
+    "expected_items": [
+      { "name": "eggs", "quantity": 12, "unit": null },
+      { "name": "milk", "quantity": 1.89, "unit": "L" },
+      { "name": "ground turkey", "quantity": 453, "unit": "g" },
+      { "name": "kale", "quantity": 1, "unit": null }
+    ],
+    "notes": "Colloquial US units (dozen, half gallon, pound) must be converted to metric/count equivalents."
+  }
+]
