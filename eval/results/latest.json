@@ -1,0 +1,2754 @@
+{
+  "timestamp": "20260824T055808Z",
+  "components": {
+    "receipt_parsing": {
+      "component": "receipt_parsing",
+      "total_cases": 15,
+      "passed_cases": 2,
+      "pass_rate": 0.13333333333333333,
+      "avg_score": null,
+      "component_score": 13.333333333333334,
+      "component_passed": false,
+      "cases": [
+        {
+          "id": 1,
+          "input": "chicken breast 1kg, spinach 200g, eggs 12, milk 2L",
+          "expected": [
+            {
+              "name": "chicken breast",
+              "quantity": 1,
+              "unit": "kg"
+            },
+            {
+              "name": "spinach",
+              "quantity": 200,
+              "unit": "g"
+            },
+            {
+              "name": "eggs",
+              "quantity": 12,
+              "unit": null
+            },
+            {
+              "name": "milk",
+              "quantity": 2,
+              "unit": "L"
+            }
+          ],
+          "actual": [
+            {
+              "name": "chicken breast",
+              "quantity": 1,
+              "unit": "kg"
+            },
+            {
+              "name": "spinach",
+              "quantity": 200,
+              "unit": "g"
+            },
+            {
+              "name": "eggs",
+              "quantity": 12,
+              "unit": "each"
+            },
+            {
+              "name": "milk",
+              "quantity": 2,
+              "unit": "L"
+            }
+          ],
+          "item_precision": 0.75,
+          "item_recall": 0.75,
+          "passed": false
+        },
+        {
+          "id": 2,
+          "input": "2 x greek yogurt 500g, 1 x sourdough bread, 6 bananas",
+          "expected": [
+            {
+              "name": "greek yogurt",
+              "quantity": 500,
+              "unit": "g"
+            },
+            {
+              "name": "greek yogurt",
+              "quantity": 500,
+              "unit": "g"
+            },
+            {
+              "name": "sourdough bread",
+              "quantity": 1,
+              "unit": null
+            },
+            {
+              "name": "bananas",
+              "quantity": 6,
+              "unit": null
+            }
+          ],
+          "actual": [
+            {
+              "name": "greek yogurt",
+              "quantity": 2,
+              "unit": "500g"
+            },
+            {
+              "name": "sourdough bread",
+              "quantity": 1,
+              "unit": "each"
+            },
+            {
+              "name": "bananas",
+              "quantity": 6,
+              "unit": "each"
+            }
+          ],
+          "item_precision": 0.0,
+          "item_recall": 0.0,
+          "passed": false
+        },
+        {
+          "id": 3,
+          "input": "salmon fillet, broccoli florets, jasmine rice 1lb, unsalted butter",
+          "expected": [
+            {
+              "name": "salmon fillet",
+              "quantity": 1,
+              "unit": null
+            },
+            {
+              "name": "broccoli",
+              "quantity": 1,
+              "unit": null
+            },
+            {
+              "name": "jasmine rice",
+              "quantity": 1,
+              "unit": "lb"
+            },
+            {
+              "name": "butter",
+              "quantity": 1,
+              "unit": null
+            }
+          ],
+          "actual": [
+            {
+              "name": "salmon fillet",
+              "quantity": 1,
+              "unit": "each"
+            },
+            {
+              "name": "broccoli florets",
+              "quantity": 1,
+              "unit": "each"
+            },
+            {
+              "name": "jasmine rice",
+              "quantity": 1,
+              "unit": "lb"
+            },
+            {
+              "name": "unsalted butter",
+              "quantity": 1,
+              "unit": "each"
+            }
+          ],
+          "item_precision": 0.25,
+          "item_recall": 0.25,
+          "passed": false
+        },
+        {
+          "id": 4,
+          "input": "3 x free range eggs (box of 6), whole milk 4 pints",
+          "expected": [
+            {
+              "name": "eggs",
+              "quantity": 18,
+              "unit": null
+            },
+            {
+              "name": "whole milk",
+              "quantity": 4,
+              "unit": "pint"
+            }
+          ],
+          "actual": [
+            {
+              "name": "free range eggs",
+              "quantity": 3,
+              "unit": "box"
+            },
+            {
+              "name": "whole milk",
+              "quantity": 4,
+              "unit": "pint"
+            }
+          ],
+          "item_precision": 0.5,
+          "item_recall": 0.5,
+          "passed": false
+        },
+        {
+          "id": 5,
+          "input": "organic baby spinach 142g, cherry tomatoes, mozzarella di bufala 125g, fresh basil",
+          "expected": [
+            {
+              "name": "baby spinach",
+              "quantity": 142,
+              "unit": "g"
+            },
+            {
+              "name": "cherry tomatoes",
+              "quantity": 1,
+              "unit": null
+            },
+            {
+              "name": "mozzarella",
+              "quantity": 125,
+              "unit": "g"
+            },
+            {
+              "name": "fresh basil",
+              "quantity": 1,
+              "unit": null
+            }
+          ],
+          "actual": [
+            {
+              "name": "organic baby spinach",
+              "quantity": 142,
+              "unit": "g"
+            },
+            {
+              "name": "cherry tomatoes",
+              "quantity": 1,
+              "unit": "each"
+            },
+            {
+              "name": "mozzarella di bufala",
+              "quantity": 125,
+              "unit": "g"
+            },
+            {
+              "name": "fresh basil",
+              "quantity": 1,
+              "unit": "bunch"
+            }
+          ],
+          "item_precision": 0.0,
+          "item_recall": 0.0,
+          "passed": false
+        },
+        {
+          "id": 6,
+          "input": "avocados x4, lime juice 250ml, red onion, jalape\u00f1o, coriander, tortilla chips 200g",
+          "expected": [
+            {
+              "name": "avocados",
+              "quantity": 4,
+              "unit": null
+            },
+            {
+              "name": "lime juice",
+              "quantity": 250,
+              "unit": "ml"
+            },
+            {
+              "name": "red onion",
+              "quantity": 1,
+              "unit": null
+            },
+            {
+              "name": "jalape\u00f1o",
+              "quantity": 1,
+              "unit": null
+            },
+            {
+              "name": "coriander",
+              "quantity": 1,
+              "unit": null
+            },
+            {
+              "name": "tortilla chips",
+              "quantity": 200,
+              "unit": "g"
+            }
+          ],
+          "actual": [
+            {
+              "name": "avocados",
+              "quantity": 4,
+              "unit": "each"
+            },
+            {
+              "name": "lime juice",
+              "quantity": 250,
+              "unit": "ml"
+            },
+            {
+              "name": "red onion",
+              "quantity": 1,
+              "unit": "each"
+            },
+            {
+              "name": "jalape\u00f1o",
+              "quantity": 1,
+              "unit": "each"
+            },
+            {
+              "name": "coriander",
+              "quantity": 1,
+              "unit": "bunch"
+            },
+            {
+              "name": "tortilla chips",
+              "quantity": 200,
+              "unit": "g"
+            }
+          ],
+          "item_precision": 0.333,
+          "item_recall": 0.333,
+          "passed": false
+        },
+        {
+          "id": 7,
+          "input": "oat milk 1L, rolled oats 500g, frozen blueberries 300g, chia seeds 200g, maple syrup",
+          "expected": [
+            {
+              "name": "oat milk",
+              "quantity": 1,
+              "unit": "L"
+            },
+            {
+              "name": "rolled oats",
+              "quantity": 500,
+              "unit": "g"
+            },
+            {
+              "name": "frozen blueberries",
+              "quantity": 300,
+              "unit": "g"
+            },
+            {
+              "name": "chia seeds",
+              "quantity": 200,
+              "unit": "g"
+            },
+            {
+              "name": "maple syrup",
+              "quantity": 1,
+              "unit": null
+            }
+          ],
+          "actual": [
+            {
+              "name": "oat milk",
+              "quantity": 1,
+              "unit": "L"
+            },
+            {
+              "name": "rolled oats",
+              "quantity": 500,
+              "unit": "g"
+            },
+            {
+              "name": "frozen blueberries",
+              "quantity": 300,
+              "unit": "g"
+            },
+            {
+              "name": "chia seeds",
+              "quantity": 200,
+              "unit": "g"
+            },
+            {
+              "name": "maple syrup",
+              "quantity": 1,
+              "unit": "each"
+            }
+          ],
+          "item_precision": 0.8,
+          "item_recall": 0.8,
+          "passed": true
+        },
+        {
+          "id": 8,
+          "input": "ribeye steak 400g, garlic 1 bulb, rosemary, thyme, unsalted butter 200g",
+          "expected": [
+            {
+              "name": "ribeye steak",
+              "quantity": 400,
+              "unit": "g"
+            },
+            {
+              "name": "garlic",
+              "quantity": 1,
+              "unit": "bulb"
+            },
+            {
+              "name": "rosemary",
+              "quantity": 1,
+              "unit": null
+            },
+            {
+              "name": "thyme",
+              "quantity": 1,
+              "unit": null
+            },
+            {
+              "name": "butter",
+              "quantity": 200,
+              "unit": "g"
+            }
+          ],
+          "actual": [
+            {
+              "name": "ribeye steak",
+              "quantity": 400,
+              "unit": "g"
+            },
+            {
+              "name": "garlic",
+              "quantity": 1,
+              "unit": "bulb"
+            },
+            {
+              "name": "rosemary",
+              "quantity": 1,
+              "unit": "each"
+            },
+            {
+              "name": "thyme",
+              "quantity": 1,
+              "unit": "each"
+            },
+            {
+              "name": "unsalted butter",
+              "quantity": 200,
+              "unit": "g"
+            }
+          ],
+          "item_precision": 0.4,
+          "item_recall": 0.4,
+          "passed": false
+        },
+        {
+          "id": 9,
+          "input": "I bought some chicken and a few vegetables including carrots and potatoes",
+          "expected": [
+            {
+              "name": "chicken",
+              "quantity": 1,
+              "unit": null
+            },
+            {
+              "name": "carrots",
+              "quantity": 1,
+              "unit": null
+            },
+            {
+              "name": "potatoes",
+              "quantity": 1,
+              "unit": null
+            }
+          ],
+          "actual": [
+            {
+              "name": "chicken",
+              "quantity": 1,
+              "unit": "each"
+            },
+            {
+              "name": "carrots",
+              "quantity": 1,
+              "unit": "bunch"
+            },
+            {
+              "name": "potatoes",
+              "quantity": 1,
+              "unit": "lb"
+            }
+          ],
+          "item_precision": 0.0,
+          "item_recall": 0.0,
+          "passed": false
+        },
+        {
+          "id": 10,
+          "input": "Nandos Peri Peri Sauce, Philadelphia Cream Cheese 180g, Warburtons Seeded Batch Loaf",
+          "expected": [
+            {
+              "name": "peri peri sauce",
+              "quantity": 1,
+              "unit": null
+            },
+            {
+              "name": "cream cheese",
+              "quantity": 180,
+              "unit": "g"
+            },
+            {
+              "name": "seeded bread",
+              "quantity": 1,
+              "unit": null
+            }
+          ],
+          "actual": [
+            {
+              "name": "Nandos Peri Peri Sauce",
+              "quantity": 1,
+              "unit": "each"
+            },
+            {
+              "name": "Philadelphia Cream Cheese",
+              "quantity": 180,
+              "unit": "g"
+            },
+            {
+              "name": "Warburtons Seeded Batch Loaf",
+              "quantity": 1,
+              "unit": "each"
+            }
+          ],
+          "item_precision": 0.0,
+          "item_recall": 0.0,
+          "passed": false
+        },
+        {
+          "id": 11,
+          "input": "pasta 500g, passata 680g, ground beef 500g, onion, garlic, Italian herbs, parmesan",
+          "expected": [
+            {
+              "name": "pasta",
+              "quantity": 500,
+              "unit": "g"
+            },
+            {
+              "name": "passata",
+              "quantity": 680,
+              "unit": "g"
+            },
+            {
+              "name": "ground beef",
+              "quantity": 500,
+              "unit": "g"
+            },
+            {
+              "name": "onion",
+              "quantity": 1,
+              "unit": null
+            },
+            {
+              "name": "garlic",
+              "quantity": 1,
+              "unit": null
+            },
+            {
+              "name": "Italian herbs",
+              "quantity": 1,
+              "unit": null
+            },
+            {
+              "name": "parmesan",
+              "quantity": 1,
+              "unit": null
+            }
+          ],
+          "actual": [
+            {
+              "name": "pasta",
+              "quantity": 500,
+              "unit": "g"
+            },
+            {
+              "name": "passata",
+              "quantity": 680,
+              "unit": "g"
+            },
+            {
+              "name": "ground beef",
+              "quantity": 500,
+              "unit": "g"
+            },
+            {
+              "name": "onion",
+              "quantity": 1,
+              "unit": "each"
+            },
+            {
+              "name": "garlic",
+              "quantity": 1,
+              "unit": "each"
+            },
+            {
+              "name": "Italian herbs",
+              "quantity": 1,
+              "unit": "each"
+            },
+            {
+              "name": "parmesan",
+              "quantity": 1,
+              "unit": "each"
+            }
+          ],
+          "item_precision": 0.429,
+          "item_recall": 0.429,
+          "passed": false
+        },
+        {
+          "id": 12,
+          "input": "coconut milk 400ml, red curry paste, chicken thighs 600g, bell peppers, fish sauce, Thai basil",
+          "expected": [
+            {
+              "name": "coconut milk",
+              "quantity": 400,
+              "unit": "ml"
+            },
+            {
+              "name": "red curry paste",
+              "quantity": 1,
+              "unit": null
+            },
+            {
+              "name": "chicken thighs",
+              "quantity": 600,
+              "unit": "g"
+            },
+            {
+              "name": "bell peppers",
+              "quantity": 1,
+              "unit": null
+            },
+            {
+              "name": "fish sauce",
+              "quantity": 1,
+              "unit": null
+            },
+            {
+              "name": "Thai basil",
+              "quantity": 1,
+              "unit": null
+            }
+          ],
+          "actual": [
+            {
+              "name": "coconut milk",
+              "quantity": 400,
+              "unit": "ml"
+            },
+            {
+              "name": "red curry paste",
+              "quantity": 1,
+              "unit": "each"
+            },
+            {
+              "name": "chicken thighs",
+              "quantity": 600,
+              "unit": "g"
+            },
+            {
+              "name": "bell peppers",
+              "quantity": 1,
+              "unit": "each"
+            },
+            {
+              "name": "fish sauce",
+              "quantity": 1,
+              "unit": "each"
+            },
+            {
+              "name": "Thai basil",
+              "quantity": 1,
+              "unit": "bunch"
+            }
+          ],
+          "item_precision": 0.333,
+          "item_recall": 0.333,
+          "passed": false
+        },
+        {
+          "id": 13,
+          "input": "",
+          "expected": [],
+          "actual": [],
+          "item_precision": 1.0,
+          "item_recall": 1.0,
+          "passed": true
+        },
+        {
+          "id": 14,
+          "input": "water",
+          "expected": [
+            {
+              "name": "water",
+              "quantity": 1,
+              "unit": null
+            }
+          ],
+          "actual": [
+            {
+              "name": "water",
+              "quantity": 1,
+              "unit": "each"
+            }
+          ],
+          "item_precision": 0.0,
+          "item_recall": 0.0,
+          "passed": false
+        },
+        {
+          "id": 15,
+          "input": "dozen eggs, half gallon milk, pound of ground turkey, bunch of kale",
+          "expected": [
+            {
+              "name": "eggs",
+              "quantity": 12,
+              "unit": null
+            },
+            {
+              "name": "milk",
+              "quantity": 1.89,
+              "unit": "L"
+            },
+            {
+              "name": "ground turkey",
+              "quantity": 453,
+              "unit": "g"
+            },
+            {
+              "name": "kale",
+              "quantity": 1,
+              "unit": null
+            }
+          ],
+          "actual": [
+            {
+              "name": "eggs",
+              "quantity": 12,
+              "unit": "each"
+            },
+            {
+              "name": "milk",
+              "quantity": 0.5,
+              "unit": "gallon"
+            },
+            {
+              "name": "ground turkey",
+              "quantity": 1,
+              "unit": "lb"
+            },
+            {
+              "name": "kale",
+              "quantity": 1,
+              "unit": "bunch"
+            }
+          ],
+          "item_precision": 0.0,
+          "item_recall": 0.0,
+          "passed": false
+        }
+      ]
+    },
+    "expiration": {
+      "component": "expiration",
+      "total_cases": 26,
+      "passed_cases": 13,
+      "pass_rate": 0.5,
+      "avg_score": null,
+      "component_score": 50.0,
+      "component_passed": false,
+      "cases": [
+        {
+          "id": 1,
+          "item_name": "chicken breast (raw)",
+          "expiry_date": "2026-08-28",
+          "expiry_source": "haiku",
+          "expiry_confidence": "high",
+          "expected_source": "haiku",
+          "expected_confidence": "high",
+          "date_within_range": false,
+          "source_matches": true,
+          "confidence_matches": true,
+          "passed": false
+        },
+        {
+          "id": 2,
+          "item_name": "whole milk (opened)",
+          "expiry_date": "2026-08-30",
+          "expiry_source": "haiku",
+          "expiry_confidence": "high",
+          "expected_source": "haiku",
+          "expected_confidence": "high",
+          "date_within_range": true,
+          "source_matches": true,
+          "confidence_matches": true,
+          "passed": true
+        },
+        {
+          "id": 3,
+          "item_name": "eggs (12, free range)",
+          "expiry_date": "2026-10-07",
+          "expiry_source": "haiku",
+          "expiry_confidence": "high",
+          "expected_source": "haiku",
+          "expected_confidence": "high",
+          "date_within_range": false,
+          "source_matches": true,
+          "confidence_matches": true,
+          "passed": false
+        },
+        {
+          "id": 4,
+          "item_name": "baby spinach (200g, bagged)",
+          "expiry_date": "2026-08-30",
+          "expiry_source": "haiku",
+          "expiry_confidence": "high",
+          "expected_source": "haiku",
+          "expected_confidence": "high",
+          "date_within_range": true,
+          "source_matches": true,
+          "confidence_matches": true,
+          "passed": true
+        },
+        {
+          "id": 5,
+          "item_name": "greek yogurt (500g, opened)",
+          "expiry_date": "2026-09-06",
+          "expiry_source": "haiku",
+          "expiry_confidence": "high",
+          "expected_source": "haiku",
+          "expected_confidence": "high",
+          "date_within_range": true,
+          "source_matches": true,
+          "confidence_matches": true,
+          "passed": true
+        },
+        {
+          "id": 6,
+          "item_name": "sourdough bread (loaf)",
+          "expiry_date": "2026-08-28",
+          "expiry_source": "haiku",
+          "expiry_confidence": "high",
+          "expected_source": "haiku",
+          "expected_confidence": "high",
+          "date_within_range": true,
+          "source_matches": true,
+          "confidence_matches": true,
+          "passed": true
+        },
+        {
+          "id": 7,
+          "item_name": "cheddar cheese (200g, block)",
+          "expiry_date": "2026-10-23",
+          "expiry_source": "haiku",
+          "expiry_confidence": "high",
+          "expected_source": "haiku",
+          "expected_confidence": "high",
+          "date_within_range": false,
+          "source_matches": true,
+          "confidence_matches": true,
+          "passed": false
+        },
+        {
+          "id": 8,
+          "item_name": "salmon fillet (raw, 200g)",
+          "expiry_date": "2026-08-29",
+          "expiry_source": "haiku",
+          "expiry_confidence": "high",
+          "expected_source": "haiku",
+          "expected_confidence": "high",
+          "date_within_range": false,
+          "source_matches": true,
+          "confidence_matches": true,
+          "passed": false
+        },
+        {
+          "id": 9,
+          "item_name": "rolled oats (500g, dry)",
+          "expiry_date": "2027-08-23",
+          "expiry_source": "haiku",
+          "expiry_confidence": "high",
+          "expected_source": "haiku",
+          "expected_confidence": "high",
+          "date_within_range": true,
+          "source_matches": true,
+          "confidence_matches": true,
+          "passed": true
+        },
+        {
+          "id": 10,
+          "item_name": "frozen blueberries (300g)",
+          "expiry_date": "2027-08-23",
+          "expiry_source": "haiku",
+          "expiry_confidence": "high",
+          "expected_source": "haiku",
+          "expected_confidence": "high",
+          "date_within_range": true,
+          "source_matches": true,
+          "confidence_matches": true,
+          "passed": true
+        },
+        {
+          "id": 11,
+          "item_name": "avocado (ripe)",
+          "expiry_date": "2026-08-26",
+          "expiry_source": "sonnet",
+          "expiry_confidence": "low",
+          "expected_source": "haiku",
+          "expected_confidence": "high",
+          "date_within_range": true,
+          "source_matches": false,
+          "confidence_matches": false,
+          "passed": false
+        },
+        {
+          "id": 12,
+          "item_name": "avocado (unripe)",
+          "expiry_date": "2026-08-29",
+          "expiry_source": "sonnet",
+          "expiry_confidence": "low",
+          "expected_source": "haiku",
+          "expected_confidence": "high",
+          "date_within_range": true,
+          "source_matches": false,
+          "confidence_matches": false,
+          "passed": false
+        },
+        {
+          "id": 13,
+          "item_name": "garlic (1 bulb, whole)",
+          "expiry_date": "2026-10-23",
+          "expiry_source": "haiku",
+          "expiry_confidence": "high",
+          "expected_source": "haiku",
+          "expected_confidence": "high",
+          "date_within_range": false,
+          "source_matches": true,
+          "confidence_matches": true,
+          "passed": false
+        },
+        {
+          "id": 14,
+          "item_name": "fresh rosemary (bunch)",
+          "expiry_date": "2026-09-06",
+          "expiry_source": "haiku",
+          "expiry_confidence": "high",
+          "expected_source": "haiku",
+          "expected_confidence": "high",
+          "date_within_range": true,
+          "source_matches": true,
+          "confidence_matches": true,
+          "passed": true
+        },
+        {
+          "id": 15,
+          "item_name": "coconut milk (400ml, opened can)",
+          "expiry_date": "2026-09-06",
+          "expiry_source": "haiku",
+          "expiry_confidence": "high",
+          "expected_source": "haiku",
+          "expected_confidence": "high",
+          "date_within_range": false,
+          "source_matches": true,
+          "confidence_matches": true,
+          "passed": false
+        },
+        {
+          "id": 16,
+          "item_name": "red curry paste (opened jar)",
+          "expiry_date": "2026-10-23",
+          "expiry_source": "sonnet",
+          "expiry_confidence": "low",
+          "expected_source": "haiku",
+          "expected_confidence": "high",
+          "date_within_range": true,
+          "source_matches": false,
+          "confidence_matches": false,
+          "passed": false
+        },
+        {
+          "id": 17,
+          "item_name": "miso paste (opened)",
+          "expiry_date": "2027-08-23",
+          "expiry_source": "haiku",
+          "expiry_confidence": "high",
+          "expected_source": "haiku",
+          "expected_confidence": "high",
+          "date_within_range": true,
+          "source_matches": true,
+          "confidence_matches": true,
+          "passed": true
+        },
+        {
+          "id": 18,
+          "item_name": "tahini (opened jar)",
+          "expiry_date": "2027-02-23",
+          "expiry_source": "sonnet",
+          "expiry_confidence": "low",
+          "expected_source": "haiku",
+          "expected_confidence": "high",
+          "date_within_range": false,
+          "source_matches": false,
+          "confidence_matches": false,
+          "passed": false
+        },
+        {
+          "id": 19,
+          "item_name": "kimchi (homemade)",
+          "expiry_date": "2026-11-23",
+          "expiry_source": "sonnet",
+          "expiry_confidence": "low",
+          "expected_source": "sonnet",
+          "expected_confidence": "low",
+          "date_within_range": true,
+          "source_matches": true,
+          "confidence_matches": true,
+          "passed": true
+        },
+        {
+          "id": 20,
+          "item_name": "bone broth (homemade, 1L)",
+          "expiry_date": "2026-08-28",
+          "expiry_source": "sonnet",
+          "expiry_confidence": "low",
+          "expected_source": "sonnet",
+          "expected_confidence": "low",
+          "date_within_range": true,
+          "source_matches": true,
+          "confidence_matches": true,
+          "passed": true
+        },
+        {
+          "id": 21,
+          "item_name": "rendered duck fat (jar)",
+          "expiry_date": "2027-08-23",
+          "expiry_source": "haiku",
+          "expiry_confidence": "high",
+          "expected_source": "sonnet",
+          "expected_confidence": "low",
+          "date_within_range": false,
+          "source_matches": false,
+          "confidence_matches": false,
+          "passed": false
+        },
+        {
+          "id": 22,
+          "item_name": "pasta (dry, 500g)",
+          "expiry_date": "2028-08-23",
+          "expiry_source": "haiku",
+          "expiry_confidence": "high",
+          "expected_source": "haiku",
+          "expected_confidence": "high",
+          "date_within_range": false,
+          "source_matches": true,
+          "confidence_matches": true,
+          "passed": false
+        },
+        {
+          "id": 23,
+          "item_name": "ground beef (raw, 500g)",
+          "expiry_date": "2026-08-27",
+          "expiry_source": "haiku",
+          "expiry_confidence": "high",
+          "expected_source": "haiku",
+          "expected_confidence": "high",
+          "date_within_range": false,
+          "source_matches": true,
+          "confidence_matches": true,
+          "passed": false
+        },
+        {
+          "id": 24,
+          "item_name": "oat milk (1L, opened)",
+          "expiry_date": "2026-09-06",
+          "expiry_source": "haiku",
+          "expiry_confidence": "high",
+          "expected_source": "haiku",
+          "expected_confidence": "high",
+          "date_within_range": true,
+          "source_matches": true,
+          "confidence_matches": true,
+          "passed": true
+        },
+        {
+          "id": 25,
+          "item_name": "maple syrup (opened)",
+          "expiry_date": "2027-08-23",
+          "expiry_source": "haiku",
+          "expiry_confidence": "high",
+          "expected_source": "haiku",
+          "expected_confidence": "high",
+          "date_within_range": true,
+          "source_matches": true,
+          "confidence_matches": true,
+          "passed": true
+        },
+        {
+          "id": 26,
+          "item_name": "butter (unsalted, opened)",
+          "expiry_date": "2026-10-23",
+          "expiry_source": "haiku",
+          "expiry_confidence": "high",
+          "expected_source": "haiku",
+          "expected_confidence": "high",
+          "date_within_range": true,
+          "source_matches": true,
+          "confidence_matches": true,
+          "passed": true
+        }
+      ]
+    },
+    "recommendation": {
+      "component": "recommendation",
+      "total_cases": 10,
+      "passed_cases": 10,
+      "pass_rate": 1.0,
+      "avg_score": 89.16,
+      "component_score": 89.16,
+      "component_passed": true,
+      "cases": [
+        {
+          "id": 1,
+          "output": [
+            {
+              "recipe_id": "c109e2d8-8b72-4b40-bc8e-bee91a22aaef",
+              "title": "Chicken Couscous",
+              "ingredients": [
+                "Olive Oil",
+                "Onion",
+                "Chicken Breast",
+                "Ginger",
+                "Harissa Spice",
+                "Dried Apricots",
+                "Chickpeas",
+                "Couscous",
+                "Chicken Stock",
+                "Coriander"
+              ],
+              "pantry_items_used": [
+                "chicken breast"
+              ],
+              "prep_time_minutes": 20,
+              "reason": "This one-pan Moroccan dish uses the soon-to-expire chicken breast and comes together in about 20 minutes, fitting perfectly within the 30-minute limit for an intermediate cook."
+            },
+            {
+              "recipe_id": "f3b15b8a-9c41-45b6-8231-cecb5c6c1e13",
+              "title": "Chicken Alfredo Primavera",
+              "ingredients": [
+                "Butter",
+                "Olive Oil",
+                "Chicken",
+                "Salt",
+                "Squash",
+                "Broccoli",
+                "mushrooms",
+                "Pepper",
+                "onion",
+                "garlic",
+                "red pepper flakes",
+                "white wine",
+                "milk",
+                "heavy cream",
+                "Parmesan cheese",
+                "bowtie pasta",
+                "Salt",
+                "Pepper",
+                "Parsley"
+              ],
+              "pantry_items_used": [
+                "chicken breast",
+                "milk"
+              ],
+              "prep_time_minutes": 30,
+              "reason": "This creamy Italian pasta uses the expiring chicken breast and milk from the pantry and can be completed in roughly 30 minutes by an intermediate cook managing the pasta and sauce simultaneously."
+            },
+            {
+              "recipe_id": "8e4ba5e8-12e7-47a2-a816-696621ff843e",
+              "title": "Chickpea, chorizo & spinach stew",
+              "ingredients": [
+                "Extra Virgin Olive Oil",
+                "Onion",
+                "Carrots",
+                "Celery",
+                "Thyme",
+                "Bay Leaves",
+                "Garlic",
+                "Chorizo",
+                "Cinnamon",
+                "Paprika",
+                "Chickpeas",
+                "Sherry vinegar",
+                "Spinach"
+              ],
+              "pantry_items_used": [
+                "spinach"
+              ],
+              "prep_time_minutes": 20,
+              "reason": "This quick Spanish stew uses the spinach that expires soonest and requires only simple saut\u00e9ing and simmering steps, making it an easy 20-minute cook well within the time limit."
+            }
+          ],
+          "scores": {
+            "expiry_urgency": 2,
+            "dietary_compliance": 2,
+            "time_compliance": 2,
+            "rationale_specificity": 2,
+            "recipe_diversity": 2,
+            "real_recipe_ids": 2
+          },
+          "reasoning": {
+            "expiry_urgency": "The most urgent item, chicken breast (2 days until expiry), appears in the pantry_items_used of the first two recipes.",
+            "dietary_compliance": "There are no dietary restrictions specified, so all three recipes comply trivially.",
+            "time_compliance": "All three recipes have prep_time_minutes of 20, 30, and 20 respectively, all at or below the 30-minute limit.",
+            "rationale_specificity": "Each recipe's reason field names specific pantry items by name: 'chicken breast', 'chicken breast and milk', and 'spinach' respectively.",
+            "recipe_diversity": "The three recipes are clearly distinct: a Moroccan couscous dish, an Italian creamy pasta, and a Spanish chickpea stew, differing in cuisine, technique, and primary ingredients.",
+            "real_recipe_ids": "All three recipe_id values are valid UUIDs matching the xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx format."
+          },
+          "total_score": 12.0,
+          "max_score": 12.0,
+          "normalised_score_0_to_100": 100.0,
+          "passed": true
+        },
+        {
+          "id": 2,
+          "output": [
+            {
+              "recipe_id": "d043b1c8-baa9-44c4-a66d-01bffffce93d",
+              "title": "Baked salmon with fennel & tomatoes",
+              "ingredients": [
+                "Fennel",
+                "Parsley",
+                "Lemon",
+                "Cherry Tomatoes",
+                "Olive Oil",
+                "Salmon",
+                "Black Olives"
+              ],
+              "pantry_items_used": [
+                "salmon fillet"
+              ],
+              "prep_time_minutes": 40,
+              "reason": "This recipe uses your soonest-expiring salmon fillet, though it runs slightly over 20 minutes it is the simplest salmon option available and very beginner-friendly with minimal prep steps."
+            },
+            {
+              "recipe_id": "42dd6b92-9003-4a9c-8466-45ef54653c1c",
+              "title": "Chicken Congee",
+              "ingredients": [
+                "Chicken",
+                "Salt",
+                "Pepper",
+                "Ginger Cordial",
+                "Ginger",
+                "Spring Onions",
+                "Rice",
+                "Water",
+                "Coriander"
+              ],
+              "pantry_items_used": [
+                "jasmine rice"
+              ],
+              "reason": "This comforting, beginner-friendly dish uses your pantry jasmine rice and requires no special technique beyond boiling, making it one of the most accessible recipes for a new cook."
+            },
+            {
+              "recipe_id": "02f76f9f-08cc-4a09-af52-f64e2821e8ea",
+              "title": "Algerian Carrots",
+              "ingredients": [
+                "Water",
+                "Carrots",
+                "Olive Oil",
+                "Salt",
+                "Black Pepper",
+                "Ground Cinnamon",
+                "Ground Cumin",
+                "Garlic",
+                "Thyme",
+                "Bay Leaf",
+                "Lemon Juice"
+              ],
+              "pantry_items_used": [],
+              "reason": "This simple vegetable side dish uses basic pantry staples, involves straightforward steaming and seasoning steps that are easy for a beginner, and complements a salmon or rice main well."
+            }
+          ],
+          "scores": {
+            "expiry_urgency": 2,
+            "dietary_compliance": 2,
+            "time_compliance": 0,
+            "rationale_specificity": 1,
+            "recipe_diversity": 2,
+            "real_recipe_ids": 2
+          },
+          "reasoning": {
+            "expiry_urgency": "The most urgent item, salmon fillet (1 day until expiry), appears in the first recipe's pantry_items_used.",
+            "dietary_compliance": "There are no dietary restrictions specified, so all three recipes trivially comply.",
+            "time_compliance": "The first recipe has a prep_time_minutes of 40, which clearly exceeds the max_cooking_time_minutes limit of 20, and the second recipe is missing a prep_time_minutes value entirely.",
+            "rationale_specificity": "The first two rationales name specific pantry items (salmon fillet and jasmine rice), but the third rationale uses only generic descriptions like 'basic pantry staples' without naming any specific item.",
+            "recipe_diversity": "The three recipes \u2014 baked salmon, chicken congee, and Algerian carrots \u2014 are clearly distinct in cuisine, technique, and primary ingredient.",
+            "real_recipe_ids": "All three recipe_id values are valid UUIDs matching the required xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx format."
+          },
+          "total_score": 9.0,
+          "max_score": 12.0,
+          "normalised_score_0_to_100": 75.0,
+          "passed": true
+        },
+        {
+          "id": 3,
+          "output": [
+            {
+              "recipe_id": "34aaf664-5774-476c-acd5-7f55e74af00b",
+              "title": "15-minute chicken & halloumi burgers",
+              "ingredients": [
+                "Chicken Breasts",
+                "Oil",
+                "Hotsauce",
+                "Lemon Juice",
+                "Buns",
+                "Cheese",
+                "Cabbage",
+                "Mayonnaise",
+                "Sour Cream",
+                "Lettuce",
+                "Red Pepper"
+              ],
+              "pantry_items_used": [
+                "chicken breast"
+              ],
+              "prep_time_minutes": 15,
+              "reason": "This quick 15-minute recipe makes great use of the soon-expiring chicken breast and fits well within the 30-minute time limit for an intermediate cook."
+            },
+            {
+              "recipe_id": "c109e2d8-8b72-4b40-bc8e-bee91a22aaef",
+              "title": "Chicken Couscous",
+              "ingredients": [
+                "Olive Oil",
+                "Onion",
+                "Chicken Breast",
+                "Ginger",
+                "Harissa Spice",
+                "Dried Apricots",
+                "Chickpeas",
+                "Couscous",
+                "Chicken Stock",
+                "Coriander"
+              ],
+              "pantry_items_used": [
+                "chicken breast"
+              ],
+              "prep_time_minutes": 20,
+              "reason": "This flavourful one-pan Moroccan dish uses the expiring chicken breast and comes together in about 20 minutes, making it a perfect fit for an intermediate cook with a 30-minute limit."
+            },
+            {
+              "recipe_id": "3467057c-0c14-431a-9836-d3f22f09891e",
+              "title": "Imam bayildi with BBQ lamb & tzatziki",
+              "ingredients": [
+                "Aubergine",
+                "Olive Oil",
+                "Onion",
+                "Garlic",
+                "Cinnamon",
+                "Tomato",
+                "Parsley",
+                "Lamb Loin Chops",
+                "Paprika",
+                "Lemon",
+                "Greek Yogurt",
+                "Cucumber",
+                "Mint"
+              ],
+              "pantry_items_used": [
+                "greek yogurt",
+                "cucumber",
+                "garlic"
+              ],
+              "prep_time_minutes": 30,
+              "reason": "The tzatziki component of this dish uses the cucumber, Greek yogurt, and garlic that are all nearing expiry, making this a smart and delicious way to reduce waste for an intermediate cook."
+            }
+          ],
+          "scores": {
+            "expiry_urgency": 2,
+            "dietary_compliance": 0,
+            "time_compliance": 2,
+            "rationale_specificity": 2,
+            "recipe_diversity": 2,
+            "real_recipe_ids": 2
+          },
+          "reasoning": {
+            "expiry_urgency": "The most urgent item, chicken breast (3 days), appears in the pantry_items_used of the first two recipes.",
+            "dietary_compliance": "The user requires dairy-free, but Recipe 1 contains cheese, mayonnaise, and sour cream, and Recipe 3 contains Greek yogurt and halloumi-adjacent tzatziki \u2014 clear dairy violations.",
+            "time_compliance": "All three recipes have prep_time_minutes of 15, 20, and 30, all within the 30-minute limit.",
+            "rationale_specificity": "All three reason fields name specific pantry items by name (e.g., 'chicken breast', 'cucumber', 'Greek yogurt', 'garlic').",
+            "recipe_diversity": "The three recipes are clearly distinct: a burger, a Moroccan couscous dish, and a Middle Eastern aubergine dish with BBQ lamb.",
+            "real_recipe_ids": "All three recipe_id values are valid UUIDs matching the required format."
+          },
+          "total_score": 10.0,
+          "max_score": 12.0,
+          "normalised_score_0_to_100": 83.3,
+          "passed": true
+        },
+        {
+          "id": 4,
+          "output": [
+            {
+              "recipe_id": "971d27ae-c18e-4d05-b0cb-d7191eca2dcb",
+              "title": "French Omelette",
+              "ingredients": [
+                "Eggs",
+                "Butter",
+                "Parmesan",
+                "Tarragon Leaves",
+                "Parsley",
+                "Chives",
+                "Gruy\u00e8re"
+              ],
+              "pantry_items_used": [
+                "eggs",
+                "butter"
+              ],
+              "prep_time_minutes": 10,
+              "reason": "This quick, beginner-friendly omelette uses eggs and butter from the pantry and comes together in well under 20 minutes."
+            },
+            {
+              "recipe_id": "118fa669-b328-40f6-a8ee-715a443d5e51",
+              "title": "Macaroni Pie",
+              "ingredients": [
+                "Macaroni",
+                "Butter",
+                "Cheddar Cheese",
+                "Egg",
+                "Milk",
+                "Ground Onion",
+                "Mustard",
+                "Pepper",
+                "Salt",
+                "Cayenne Pepper",
+                "Breadcrumbs",
+                "Butter",
+                "Cheddar Cheese"
+              ],
+              "pantry_items_used": [
+                "butter",
+                "cheddar cheese",
+                "eggs",
+                "milk"
+              ],
+              "prep_time_minutes": 20,
+              "reason": "This recipe uses four pantry items that are all in stock \u2014 butter, cheddar cheese, eggs, and milk \u2014 making it a great way to use what you already have, and the prep steps before baking are simple enough for a beginner."
+            },
+            {
+              "recipe_id": "8af9abc8-b07d-459e-bb95-a1e5573963fb",
+              "title": "Boxty Breakfast",
+              "ingredients": [
+                "Potatoes",
+                "Spring Onions",
+                "Plain Flour",
+                "Egg White",
+                "Milk",
+                "Bicarbonate Of Soda",
+                "Butter",
+                "Vegetable Oil",
+                "Cherry Tomatoes",
+                "Bacon",
+                "Egg"
+              ],
+              "pantry_items_used": [
+                "eggs",
+                "milk",
+                "butter"
+              ],
+              "prep_time_minutes": 20,
+              "reason": "This hearty non-vegetarian breakfast uses eggs, milk, and butter from the pantry and the active cooking steps fit within 20 minutes for a beginner."
+            }
+          ],
+          "scores": {
+            "expiry_urgency": 2,
+            "dietary_compliance": 0,
+            "time_compliance": 2,
+            "rationale_specificity": 2,
+            "recipe_diversity": 2,
+            "real_recipe_ids": 2
+          },
+          "reasoning": {
+            "expiry_urgency": "Milk (days_until_expiry: 5) is the most urgent pantry item and appears in both Macaroni Pie and Boxty Breakfast's pantry_items_used.",
+            "dietary_compliance": "Boxty Breakfast explicitly includes bacon, a meat ingredient, which is a clear vegetarian violation.",
+            "time_compliance": "All three recipes have prep_time_minutes of 10 or 20, both at or below the 20-minute maximum.",
+            "rationale_specificity": "All three rationales name specific pantry items by name (e.g., eggs and butter, butter/cheddar cheese/eggs/milk, eggs/milk/butter).",
+            "recipe_diversity": "The three recipes are clearly distinct: a French Omelette (egg-forward, pan technique), Macaroni Pie (pasta bake), and Boxty Breakfast (potato pancake), differing in cuisine, primary ingredient, and technique.",
+            "real_recipe_ids": "All three recipe_id values are valid UUIDs matching the xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx format."
+          },
+          "total_score": 10.0,
+          "max_score": 12.0,
+          "normalised_score_0_to_100": 83.3,
+          "passed": true
+        },
+        {
+          "id": 5,
+          "output": [
+            {
+              "recipe_id": "e830d5b8-8993-4fb8-ad4e-217067bc2063",
+              "title": "Cabbage with Ground Beef",
+              "ingredients": [
+                "Olive Oil",
+                "Ground Beef",
+                "Onion",
+                "Carrots",
+                "Red Pepper",
+                "Tomato Puree",
+                "Garlic",
+                "Salt",
+                "Black Pepper",
+                "Smoked Paprika",
+                "Ground Cumin",
+                "Cabbage",
+                "Apple Cider Vinegar",
+                "Water",
+                "Parsley"
+              ],
+              "pantry_items_used": [
+                "ground beef",
+                "onion",
+                "garlic"
+              ],
+              "prep_time_minutes": 45,
+              "reason": "This recipe uses the soonest-expiring pantry items \u2014 ground beef, onion, and garlic \u2014 and can be completed in about 45 minutes at an intermediate skill level."
+            },
+            {
+              "recipe_id": "21e9b4c5-f7f4-4986-a081-88cc52a2fc4a",
+              "title": "Beef stroganoff",
+              "ingredients": [
+                "Olive Oil",
+                "Onions",
+                "Garlic",
+                "Butter",
+                "Mushrooms",
+                "Beef Fillet",
+                "Plain Flour",
+                "Creme Fraiche",
+                "English Mustard",
+                "Beef Stock",
+                "Parsley"
+              ],
+              "pantry_items_used": [
+                "onion",
+                "garlic",
+                "pasta"
+              ],
+              "prep_time_minutes": 35,
+              "reason": "This classic dish uses pantry onion, garlic, and pasta (as the recommended pappardelle accompaniment), fits within 45 minutes, and suits an intermediate cook."
+            },
+            {
+              "recipe_id": "b215eb4a-57e1-471c-a453-756b4e64acb2",
+              "title": "Beef pho",
+              "ingredients": [
+                "Beef Stock",
+                "Onion",
+                "Ginger",
+                "Cinnamon Stick",
+                "Star Anise",
+                "Coriander Seeds",
+                "Cloves",
+                "Sirloin steak",
+                "Palm Sugar",
+                "Fish Sauce",
+                "Soy Sauce",
+                "Rice Noodles",
+                "Spring Onions",
+                "Birds-eye Chillies",
+                "Basil",
+                "Coriander",
+                "Lime"
+              ],
+              "pantry_items_used": [
+                "onion",
+                "garlic"
+              ],
+              "prep_time_minutes": 45,
+              "reason": "This flavourful Vietnamese dish uses pantry onion and can be completed in 45 minutes, offering an enjoyable intermediate-level cooking challenge."
+            }
+          ],
+          "scores": {
+            "expiry_urgency": 2,
+            "dietary_compliance": 2,
+            "time_compliance": 2,
+            "rationale_specificity": 2,
+            "recipe_diversity": 2,
+            "real_recipe_ids": 2
+          },
+          "reasoning": {
+            "expiry_urgency": "Ground beef (days_until_expiry: 1, the most urgent item) appears in the pantry_items_used of the first recipe 'Cabbage with Ground Beef'.",
+            "dietary_compliance": "There are no dietary restrictions specified, so all three recipes trivially comply.",
+            "time_compliance": "All three recipes have prep_time_minutes of 45 or below, meeting the max_cooking_time_minutes limit of 45.",
+            "rationale_specificity": "All three rationales name specific pantry items by name (e.g., 'ground beef, onion, and garlic', 'pantry onion, garlic, and pasta', 'pantry onion').",
+            "recipe_diversity": "The three recipes \u2014 a cabbage stir-fry, a creamy stroganoff, and a Vietnamese pho \u2014 are clearly distinct in cuisine, technique, and primary ingredients.",
+            "real_recipe_ids": "All three recipe_id values are valid UUIDs matching the format xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx."
+          },
+          "total_score": 12.0,
+          "max_score": 12.0,
+          "normalised_score_0_to_100": 100.0,
+          "passed": true
+        },
+        {
+          "id": 6,
+          "output": [
+            {
+              "recipe_id": "e6c19f0f-463d-4ff7-93b4-54bfad4c7d60",
+              "title": "Oatmeal pancakes",
+              "ingredients": [
+                "Egg",
+                "Milk",
+                "Sugar",
+                "Baking Powder",
+                "Salt",
+                "Vanilla Extract",
+                "Ground Oats",
+                "Butter",
+                "Sugar Syrup",
+                "Strawberries"
+              ],
+              "pantry_items_used": [
+                "rolled oats"
+              ],
+              "prep_time_minutes": 15,
+              "reason": "This beginner-friendly pancake recipe uses the rolled oats from your pantry and comes together in about 15 minutes making it a perfect quick meal."
+            },
+            {
+              "recipe_id": "464e95e5-dc5f-4d77-9b02-701e4a3f82e4",
+              "title": "Anzac biscuits",
+              "ingredients": [
+                "Porridge oats",
+                "Desiccated Coconut",
+                "Plain Flour",
+                "Caster Sugar",
+                "Butter",
+                "Golden Syrup",
+                "Bicarbonate Of Soda"
+              ],
+              "pantry_items_used": [
+                "rolled oats"
+              ],
+              "prep_time_minutes": 15,
+              "reason": "This simple mix-and-bake biscuit recipe is ideal for a beginner, uses your rolled oats, and the hands-on prep takes well under 15 minutes before the oven does the rest."
+            },
+            {
+              "recipe_id": "6793dba6-25f6-4d1c-88c8-b95d7e44a032",
+              "title": "Callaloo Jamaican Style",
+              "ingredients": [
+                "Kale",
+                "Bacon",
+                "Garlic",
+                "Onion",
+                "Paprika",
+                "Thyme",
+                "Tomato",
+                "Red Pepper",
+                "Banana",
+                "Vegetable Oil"
+              ],
+              "pantry_items_used": [
+                "banana"
+              ],
+              "prep_time_minutes": 15,
+              "reason": "This flavourful non-vegan dish uses your soon-expiring banana and the straightforward saut\u00e9 steps are easy enough for a beginner cook to complete quickly."
+            }
+          ],
+          "scores": {
+            "expiry_urgency": 2,
+            "dietary_compliance": 0,
+            "time_compliance": 2,
+            "rationale_specificity": 2,
+            "recipe_diversity": 2,
+            "real_recipe_ids": 2
+          },
+          "reasoning": {
+            "expiry_urgency": "The banana (days_until_expiry: 3, the most urgent item) appears in the third recipe's pantry_items_used.",
+            "dietary_compliance": "All three recipes violate the vegan restriction: recipe 1 includes egg, milk, and butter; recipe 2 includes butter; recipe 3 includes bacon.",
+            "time_compliance": "All three recipes have prep_time_minutes of 15, which is at or below the 15-minute limit.",
+            "rationale_specificity": "All three rationales name specific pantry items by name (rolled oats, rolled oats, and banana respectively).",
+            "recipe_diversity": "The three recipes are clearly distinct: oatmeal pancakes (breakfast/griddle), Anzac biscuits (baked snack), and Callaloo Jamaican Style (savory saut\u00e9ed dish).",
+            "real_recipe_ids": "All three recipe_id values are valid UUIDs matching the required xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx format."
+          },
+          "total_score": 10.0,
+          "max_score": 12.0,
+          "normalised_score_0_to_100": 83.3,
+          "passed": true
+        },
+        {
+          "id": 7,
+          "output": [
+            {
+              "recipe_id": "6a1abb0f-fc71-4ecf-b6dd-ae15b2d506f0",
+              "title": "Ayam Percik",
+              "ingredients": [
+                "Chicken Thighs",
+                "Challots",
+                "Ginger",
+                "Garlic Clove",
+                "Cayenne Pepper",
+                "Turmeric",
+                "Cumin",
+                "Coriander",
+                "Fennel",
+                "Tamarind Paste",
+                "Coconut Milk",
+                "Sugar",
+                "Water"
+              ],
+              "pantry_items_used": [
+                "chicken thighs",
+                "coconut milk"
+              ],
+              "prep_time_minutes": 55,
+              "reason": "This Malaysian recipe uses the soon-expiring chicken thighs and coconut milk as its hero ingredients, fits within 60 minutes if the marinade step is abbreviated, and rewards an advanced cook with a complex layered spice paste and roasting technique."
+            },
+            {
+              "recipe_id": "5f7c4994-3751-428d-8843-83216e4c9d2c",
+              "title": "Brown Stew Chicken",
+              "ingredients": [
+                "Chicken",
+                "Tomato",
+                "Onions",
+                "Garlic Clove",
+                "Red Pepper",
+                "Carrots",
+                "Lime",
+                "Thyme",
+                "Allspice",
+                "Soy Sauce",
+                "Cornstarch",
+                "Coconut Milk",
+                "Vegetable Oil"
+              ],
+              "pantry_items_used": [
+                "chicken thighs",
+                "coconut milk"
+              ],
+              "prep_time_minutes": 50,
+              "reason": "This Jamaican stew makes excellent use of the expiring chicken thighs and coconut milk, comes together in under 60 minutes, and involves browning, deglazing, and sauce-building techniques that suit an advanced home cook."
+            },
+            {
+              "recipe_id": "1842cff4-cdc6-4ae3-ad63-6630cfd9da66",
+              "title": "Amok Trey \u2013 Cambodian Fish Curry",
+              "ingredients": [
+                "Fish fillet",
+                "Coconut Milk",
+                "Red Curry Paste",
+                "Fish Sauce",
+                "Brown Sugar",
+                "Chicken Stock",
+                "Egg",
+                "Kaffir Lime Leaves",
+                "Vegetable Oil",
+                "Banana Leaves",
+                "Cilantro",
+                "Lime"
+              ],
+              "pantry_items_used": [
+                "coconut milk",
+                "red curry paste"
+              ],
+              "reason": "This recipe deploys the soon-expiring coconut milk alongside the red curry paste, finishes well within 60 minutes, and the custard-thickening and banana-leaf steaming techniques provide the kind of nuanced, technique-driven cooking an advanced cook will enjoy."
+            }
+          ],
+          "scores": {
+            "expiry_urgency": 2,
+            "dietary_compliance": 2,
+            "time_compliance": 1,
+            "rationale_specificity": 2,
+            "recipe_diversity": 2,
+            "real_recipe_ids": 2
+          },
+          "reasoning": {
+            "expiry_urgency": "The most urgent item, chicken thighs (2 days until expiry), appears in pantry_items_used for the first two recipes.",
+            "dietary_compliance": "No dietary restrictions were specified, so all three recipes comply by default.",
+            "time_compliance": "The third recipe (Amok Trey) has no prep_time_minutes field provided, making it impossible to confirm compliance, and the first recipe notes the 60-minute limit is only met if a marinade step is abbreviated, suggesting a borderline case.",
+            "rationale_specificity": "All three rationales name specific pantry items by name, such as 'chicken thighs,' 'coconut milk,' and 'red curry paste.'",
+            "recipe_diversity": "The three recipes span Malaysian, Jamaican, and Cambodian cuisines with distinct primary proteins (chicken grilled/roasted, chicken stewed, fish steamed) and different cooking techniques.",
+            "real_recipe_ids": "All three recipe_id values are valid UUIDs matching the required xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx format."
+          },
+          "total_score": 11.0,
+          "max_score": 12.0,
+          "normalised_score_0_to_100": 91.7,
+          "passed": true
+        },
+        {
+          "id": 8,
+          "output": [
+            {
+              "recipe_id": "02f76f9f-08cc-4a09-af52-f64e2821e8ea",
+              "title": "Algerian Carrots",
+              "ingredients": [
+                "Water",
+                "Carrots",
+                "Olive Oil",
+                "Salt",
+                "Black Pepper",
+                "Ground Cinnamon",
+                "Ground Cumin",
+                "Garlic",
+                "Thyme",
+                "Bay Leaf",
+                "Lemon Juice"
+              ],
+              "pantry_items_used": [
+                "carrots",
+                "garlic"
+              ],
+              "prep_time_minutes": 30,
+              "reason": "This dish uses the soonest-expiring carrots and garlic from the pantry, fits within 30 minutes, and suits an intermediate cook looking for a non-vegan, flavourful side."
+            },
+            {
+              "recipe_id": "f9c75dcc-1eb7-48fb-9dae-76f6b3aaa61a",
+              "title": "Carrot and Bean Fritters",
+              "ingredients": [
+                "Carrots",
+                "Canned Beans",
+                "Garlic",
+                "Flour",
+                "Breadcrumbs",
+                "Thyme",
+                "Parsley",
+                "Salt",
+                "Pepper",
+                "Thyme",
+                "Oil"
+              ],
+              "pantry_items_used": [
+                "carrots",
+                "garlic"
+              ],
+              "prep_time_minutes": 25,
+              "reason": "These fritters make great use of the expiring carrots and garlic and can be prepared and cooked well within 30 minutes at an intermediate skill level."
+            },
+            {
+              "recipe_id": "fa2bff3c-d097-438b-8ef7-fa11b2649b76",
+              "title": "Bean & Sausage Hotpot",
+              "ingredients": [
+                "Sausages",
+                "Tomato Sauce",
+                "Butter Beans",
+                "Black Treacle",
+                "English Mustard"
+              ],
+              "pantry_items_used": [],
+              "prep_time_minutes": 30,
+              "reason": "This hearty, non-vegan hotpot is quick to pull together in exactly 30 minutes and complements the vegetable-focused pantry with a satisfying protein-rich meal."
+            }
+          ],
+          "scores": {
+            "expiry_urgency": 2,
+            "dietary_compliance": 0,
+            "time_compliance": 2,
+            "rationale_specificity": 2,
+            "recipe_diversity": 1,
+            "real_recipe_ids": 2
+          },
+          "reasoning": {
+            "expiry_urgency": "Carrots (the most urgent item at 14 days) appear in both Recipe 1 and Recipe 2's pantry_items_used.",
+            "dietary_compliance": "Recipe 3 (Bean & Sausage Hotpot) contains sausages and butter, which are not vegan, and Recipe 1's rationale explicitly describes itself as 'non-vegan', making this a clear dietary violation.",
+            "time_compliance": "All three recipes have prep_time_minutes at or below the 30-minute limit (30, 25, and 30 respectively).",
+            "rationale_specificity": "All three rationales name specific pantry items by name: carrots and garlic are explicitly mentioned in recipes 1 and 2, though recipe 3 references the 'vegetable-focused pantry' without naming specific items \u2014 still, overall two of three are clearly specific.",
+            "recipe_diversity": "Recipes 1 and 2 are both carrot-and-garlic-based dishes with significant overlap in primary ingredients and technique, while Recipe 3 is distinct but only two are truly different from each other.",
+            "real_recipe_ids": "All three recipe_id values are valid UUIDs matching the xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx format."
+          },
+          "total_score": 9.0,
+          "max_score": 12.0,
+          "normalised_score_0_to_100": 75.0,
+          "passed": true
+        },
+        {
+          "id": 9,
+          "output": [
+            {
+              "recipe_id": "c109e2d8-8b72-4b40-bc8e-bee91a22aaef",
+              "title": "Chicken Couscous",
+              "ingredients": [
+                "Olive Oil",
+                "Onion",
+                "Chicken Breast",
+                "Ginger",
+                "Harissa Spice",
+                "Dried Apricots",
+                "Chickpeas",
+                "Couscous",
+                "Chicken Stock",
+                "Coriander"
+              ],
+              "pantry_items_used": [
+                "chicken breast"
+              ],
+              "prep_time_minutes": 20,
+              "reason": "This quick one-pan Moroccan dish uses the expiring chicken breast and comes together in well under 30 minutes, making it a great fit for an intermediate cook on a time limit."
+            },
+            {
+              "recipe_id": "f3b15b8a-9c41-45b6-8231-cecb5c6c1e13",
+              "title": "Chicken Alfredo Primavera",
+              "ingredients": [
+                "Butter",
+                "Olive Oil",
+                "Chicken",
+                "Salt",
+                "Squash",
+                "Broccoli",
+                "mushrooms",
+                "Pepper",
+                "onion",
+                "garlic",
+                "red pepper flakes",
+                "white wine",
+                "milk",
+                "heavy cream",
+                "Parmesan cheese",
+                "bowtie pasta",
+                "Salt",
+                "Pepper",
+                "Parsley"
+              ],
+              "pantry_items_used": [
+                "chicken breast",
+                "milk"
+              ],
+              "prep_time_minutes": 30,
+              "reason": "This recipe uses both the soon-to-expire chicken breast and milk in a satisfying pasta dish that an intermediate cook can manage within the 30-minute window."
+            },
+            {
+              "recipe_id": "8e4ba5e8-12e7-47a2-a816-696621ff843e",
+              "title": "Chickpea, chorizo & spinach stew",
+              "ingredients": [
+                "Extra Virgin Olive Oil",
+                "Onion",
+                "Carrots",
+                "Celery",
+                "Thyme",
+                "Bay Leaves",
+                "Garlic",
+                "Chorizo",
+                "Cinnamon",
+                "Paprika",
+                "Chickpeas",
+                "Sherry vinegar",
+                "Spinach"
+              ],
+              "pantry_items_used": [
+                "spinach"
+              ],
+              "prep_time_minutes": 20,
+              "reason": "This fast Spanish stew uses the spinach that expires soon and is straightforward enough for an intermediate cook to complete comfortably in under 30 minutes."
+            }
+          ],
+          "scores": {
+            "expiry_urgency": 2,
+            "dietary_compliance": 2,
+            "time_compliance": 2,
+            "rationale_specificity": 2,
+            "recipe_diversity": 2,
+            "real_recipe_ids": 2
+          },
+          "reasoning": {
+            "expiry_urgency": "The most urgent item, chicken breast (2 days until expiry), appears in pantry_items_used for both Recipe 1 and Recipe 2.",
+            "dietary_compliance": "No dietary restrictions were specified, so all three recipes comply by default.",
+            "time_compliance": "All three recipes have prep_time_minutes of 20, 30, and 20 respectively, all at or below the 30-minute limit.",
+            "rationale_specificity": "All three rationales name specific pantry items by name: 'chicken breast' in recipes 1 and 2, and 'spinach' in recipe 3.",
+            "recipe_diversity": "The three recipes are clearly distinct: a Moroccan couscous dish, an Italian pasta dish, and a Spanish stew, using different cuisines, techniques, and primary ingredients.",
+            "real_recipe_ids": "All three recipe_id values are valid UUIDs matching the xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx format."
+          },
+          "total_score": 12.0,
+          "max_score": 12.0,
+          "normalised_score_0_to_100": 100.0,
+          "passed": true
+        },
+        {
+          "id": 10,
+          "output": [
+            {
+              "recipe_id": "d043b1c8-baa9-44c4-a66d-01bffffce93d",
+              "title": "Baked salmon with fennel & tomatoes",
+              "ingredients": [
+                "2 medium Fennel",
+                "2 tbs chopped Parsley",
+                "Juice of 1 Lemon",
+                "175g Cherry Tomatoes",
+                "1 tbs Olive Oil",
+                "350g Salmon",
+                "Black Olives to serve"
+              ],
+              "pantry_items_used": [
+                "salmon fillet"
+              ],
+              "prep_time_minutes": 30,
+              "reason": "This recipe uses the soonest-expiring salmon fillet and comes together in about 30 minutes with simple intermediate techniques like boiling and baking."
+            },
+            {
+              "recipe_id": "21e9b4c5-f7f4-4986-a081-88cc52a2fc4a",
+              "title": "Beef stroganoff",
+              "ingredients": [
+                "1 tbls Olive Oil",
+                "1 Onion",
+                "1 clove Garlic",
+                "1 tbsp Butter",
+                "250g Mushrooms",
+                "500g Beef Fillet",
+                "1tbsp Plain Flour",
+                "150g Creme Fraiche",
+                "1 tbsp English Mustard",
+                "100ml Beef Stock",
+                "Parsley for topping"
+              ],
+              "pantry_items_used": [
+                "ground beef"
+              ],
+              "prep_time_minutes": 30,
+              "reason": "This quick pan-based dish uses the ground beef from the pantry and can be completed in about 30 minutes, suiting an intermediate cook perfectly."
+            },
+            {
+              "recipe_id": "3f41ebee-1992-47d1-b76b-a4fe8f031418",
+              "title": "Chicken & mushroom Hotpot",
+              "ingredients": [
+                "50g Butter",
+                "1 chopped Onion",
+                "100g Mushrooms",
+                "40g Plain Flour",
+                "1 Chicken Stock Cube",
+                "pinch Nutmeg",
+                "pinch Mustard Powder",
+                "250g Chicken",
+                "2 Handfuls Sweetcorn",
+                "2 large Potatoes",
+                "1 knob Butter"
+              ],
+              "pantry_items_used": [
+                "chicken breast"
+              ],
+              "prep_time_minutes": 30,
+              "reason": "This comforting hotpot makes great use of the chicken breast expiring soonest after the salmon, and while the oven phase runs long the prep and sauce-making are well within an intermediate cook's 30-minute active cooking window."
+            }
+          ],
+          "scores": {
+            "expiry_urgency": 2,
+            "dietary_compliance": 2,
+            "time_compliance": 2,
+            "rationale_specificity": 2,
+            "recipe_diversity": 2,
+            "real_recipe_ids": 2
+          },
+          "reasoning": {
+            "expiry_urgency": "The most urgent items (salmon fillet and ground beef, both at 1 day) each appear in at least one recipe's pantry_items_used.",
+            "dietary_compliance": "No dietary restrictions were specified, so all three recipes trivially comply.",
+            "time_compliance": "All three recipes have prep_time_minutes of exactly 30, which is at or below the 30-minute limit.",
+            "rationale_specificity": "Each reason field names a specific pantry item by name: 'salmon fillet', 'ground beef', and 'chicken breast' respectively.",
+            "recipe_diversity": "The three recipes are clearly distinct: a baked fish dish, a pan-based beef stroganoff, and a chicken hotpot \u2014 differing in primary protein, cuisine style, and cooking technique.",
+            "real_recipe_ids": "All three recipe_id values are valid UUIDs matching the xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx format."
+          },
+          "total_score": 12.0,
+          "max_score": 12.0,
+          "normalised_score_0_to_100": 100.0,
+          "passed": true
+        }
+      ]
+    },
+    "deduction": {
+      "component": "deduction",
+      "total_cases": 14,
+      "passed_cases": 11,
+      "pass_rate": 0.7857142857142857,
+      "avg_score": null,
+      "component_score": 78.57142857142857,
+      "component_passed": true,
+      "cases": [
+        {
+          "id": 1,
+          "recipe_ingredient": "fresh spinach",
+          "pantry_item": "spinach 200g",
+          "expected_match": true,
+          "actual_match": true,
+          "plan": [
+            {
+              "pantry_item_id": "edf5f7a1-79a9-4b1d-b6b3-462da163e6b6",
+              "pantry_item_name": "spinach",
+              "quantity_to_deduct": 100.0,
+              "unit": "g",
+              "confidence": 0.85
+            }
+          ],
+          "passed": true
+        },
+        {
+          "id": 2,
+          "recipe_ingredient": "chicken breasts",
+          "pantry_item": "chicken breast 1kg",
+          "expected_match": true,
+          "actual_match": true,
+          "plan": [
+            {
+              "pantry_item_id": "b5e92a43-0c75-441a-8b5b-0cdf1f14f4b8",
+              "pantry_item_name": "chicken breast",
+              "quantity_to_deduct": 0.5,
+              "unit": "kg",
+              "confidence": 0.7
+            }
+          ],
+          "passed": true
+        },
+        {
+          "id": 3,
+          "recipe_ingredient": "whole milk",
+          "pantry_item": "milk 2L",
+          "expected_match": true,
+          "actual_match": true,
+          "plan": [
+            {
+              "pantry_item_id": "c972b757-d66e-4a47-8df1-75f6df588c49",
+              "pantry_item_name": "milk",
+              "quantity_to_deduct": 0.24,
+              "unit": "L",
+              "confidence": 0.95
+            }
+          ],
+          "passed": true
+        },
+        {
+          "id": 4,
+          "recipe_ingredient": "free range eggs",
+          "pantry_item": "eggs 12",
+          "expected_match": true,
+          "actual_match": true,
+          "plan": [
+            {
+              "pantry_item_id": "5cc3bdd3-480e-419a-9a69-df60c12facf2",
+              "pantry_item_name": "eggs",
+              "quantity_to_deduct": 1.0,
+              "unit": null,
+              "confidence": 0.95
+            }
+          ],
+          "passed": true
+        },
+        {
+          "id": 5,
+          "recipe_ingredient": "Greek yoghurt",
+          "pantry_item": "greek yogurt 500g",
+          "expected_match": true,
+          "actual_match": true,
+          "plan": [
+            {
+              "pantry_item_id": "1aec9c5d-b3d0-4524-af7c-cbf797b479ae",
+              "pantry_item_name": "greek yogurt",
+              "quantity_to_deduct": 100,
+              "unit": "g",
+              "confidence": 0.85
+            }
+          ],
+          "passed": true
+        },
+        {
+          "id": 6,
+          "recipe_ingredient": "natural yogurt",
+          "pantry_item": "greek yogurt 500g",
+          "expected_match": false,
+          "actual_match": true,
+          "plan": [
+            {
+              "pantry_item_id": "f547d8bb-5d8d-4146-ae60-b279044dccd0",
+              "pantry_item_name": "greek yogurt",
+              "quantity_to_deduct": 200.0,
+              "unit": "g",
+              "confidence": 0.72
+            }
+          ],
+          "passed": false
+        },
+        {
+          "id": 7,
+          "recipe_ingredient": "vegetable oil",
+          "pantry_item": null,
+          "expected_match": false,
+          "actual_match": false,
+          "plan": [],
+          "passed": true
+        },
+        {
+          "id": 8,
+          "recipe_ingredient": "spring onions",
+          "pantry_item": "red onion 1",
+          "expected_match": false,
+          "actual_match": true,
+          "plan": [
+            {
+              "pantry_item_id": "29287c42-98f1-4442-9137-15b6789d9975",
+              "pantry_item_name": "red onion",
+              "quantity_to_deduct": 1.0,
+              "unit": null,
+              "confidence": 0.35
+            }
+          ],
+          "passed": false
+        },
+        {
+          "id": 9,
+          "recipe_ingredient": "coriander",
+          "pantry_item": "fresh coriander bunch",
+          "expected_match": true,
+          "actual_match": true,
+          "plan": [
+            {
+              "pantry_item_id": "471a93dd-dda0-4a01-b70d-574bc001adf8",
+              "pantry_item_name": "fresh coriander bunch",
+              "quantity_to_deduct": 1,
+              "unit": null,
+              "confidence": 0.7
+            }
+          ],
+          "passed": true
+        },
+        {
+          "id": 10,
+          "recipe_ingredient": "salmon fillets",
+          "pantry_item": "salmon fillet 200g",
+          "expected_match": true,
+          "actual_match": true,
+          "plan": [
+            {
+              "pantry_item_id": "7a63bb24-314e-4fd1-bdfc-9765a8883770",
+              "pantry_item_name": "salmon fillet",
+              "quantity_to_deduct": 200.0,
+              "unit": "g",
+              "confidence": 0.95
+            }
+          ],
+          "passed": true
+        },
+        {
+          "id": 11,
+          "recipe_ingredient": "butter",
+          "pantry_item": "unsalted butter 200g",
+          "expected_match": true,
+          "actual_match": true,
+          "plan": [
+            {
+              "pantry_item_id": "4556842a-794c-4611-88f9-227be5f9b98f",
+              "pantry_item_name": "unsalted butter",
+              "quantity_to_deduct": 50.0,
+              "unit": "g",
+              "confidence": 0.7
+            }
+          ],
+          "passed": true
+        },
+        {
+          "id": 13,
+          "recipe_ingredient": "parmesan cheese",
+          "pantry_item": "cheddar cheese 200g",
+          "expected_match": false,
+          "actual_match": true,
+          "plan": [
+            {
+              "pantry_item_id": "818d72c1-cf41-4398-b363-a478812a57ac",
+              "pantry_item_name": "cheddar cheese",
+              "quantity_to_deduct": 50.0,
+              "unit": "g",
+              "confidence": 0.3
+            }
+          ],
+          "passed": false
+        },
+        {
+          "id": 14,
+          "recipe_ingredient": "minced beef",
+          "pantry_item": "ground beef 500g",
+          "expected_match": true,
+          "actual_match": true,
+          "plan": [
+            {
+              "pantry_item_id": "0d152a75-5d26-43c5-b1e4-4fb49d34c8df",
+              "pantry_item_name": "ground beef",
+              "quantity_to_deduct": 500.0,
+              "unit": "g",
+              "confidence": 0.95
+            }
+          ],
+          "passed": true
+        },
+        {
+          "id": 15,
+          "recipe_ingredient": "capsicum",
+          "pantry_item": "bell pepper 2",
+          "expected_match": true,
+          "actual_match": true,
+          "plan": [
+            {
+              "pantry_item_id": "c362b103-d109-4ff1-b155-f450979fd4cf",
+              "pantry_item_name": "bell pepper",
+              "quantity_to_deduct": 1.0,
+              "unit": null,
+              "confidence": 0.95
+            }
+          ],
+          "passed": true
+        }
+      ]
+    },
+    "shopping_list": {
+      "component": "shopping_list",
+      "total_cases": 5,
+      "passed_cases": 4,
+      "pass_rate": 0.8,
+      "avg_score": 80.0,
+      "component_score": 80.0,
+      "component_passed": true,
+      "cases": [
+        {
+          "id": 1,
+          "output": [
+            {
+              "id": "2d02b047-72ba-41bc-84d7-eb35a7bed9f0",
+              "user_id": "59a4cfb0-2e94-50b8-844e-3718517afa68",
+              "name": "spinach",
+              "quantity": 200,
+              "unit": "g",
+              "rationale": "Enables recreating the recently cooked Chickpea chorizo and spinach stew, which requires spinach not currently in the pantry.",
+              "added_at": "2026-08-24T05:56:29.520173+00:00",
+              "purchased": false
+            },
+            {
+              "id": "306bc1f0-4265-4031-85c4-bd8816ae84d7",
+              "user_id": "59a4cfb0-2e94-50b8-844e-3718517afa68",
+              "name": "chickpeas",
+              "quantity": 400,
+              "unit": "g",
+              "rationale": "Enables recreating the recently cooked Chickpea chorizo and spinach stew, which requires chickpeas not currently in the pantry.",
+              "added_at": "2026-08-24T05:56:29.520173+00:00",
+              "purchased": false
+            },
+            {
+              "id": "5bd3917b-c7de-4c11-bafd-966ea8d0620d",
+              "user_id": "59a4cfb0-2e94-50b8-844e-3718517afa68",
+              "name": "chorizo",
+              "quantity": 200,
+              "unit": "g",
+              "rationale": "Enables recreating the recently cooked Chickpea chorizo and spinach stew, which requires chorizo not currently in the pantry.",
+              "added_at": "2026-08-24T05:56:29.520173+00:00",
+              "purchased": false
+            },
+            {
+              "id": "820c4f7a-6831-41e6-bdc3-a1d028175550",
+              "user_id": "59a4cfb0-2e94-50b8-844e-3718517afa68",
+              "name": "butter",
+              "quantity": 250,
+              "unit": "g",
+              "rationale": "Complements the eggs and milk already on hand, enabling a range of dishes such as omelettes, pancakes, or baked goods.",
+              "added_at": "2026-08-24T05:56:29.520173+00:00",
+              "purchased": false
+            },
+            {
+              "id": "a9a8d745-87b9-4a03-8241-2501fee0dacb",
+              "user_id": "59a4cfb0-2e94-50b8-844e-3718517afa68",
+              "name": "all-purpose flour",
+              "quantity": 1,
+              "unit": "kg",
+              "rationale": "Complements the eggs and milk already on hand, rounding them out into recipes like pancakes, crepes, or simple baked goods.",
+              "added_at": "2026-08-24T05:56:29.520173+00:00",
+              "purchased": false
+            },
+            {
+              "id": "e36a2f58-4276-4dbe-bfc0-fa390eabc6f4",
+              "user_id": "59a4cfb0-2e94-50b8-844e-3718517afa68",
+              "name": "garlic",
+              "quantity": 1,
+              "unit": "head",
+              "rationale": "Complements the chicken breast already in the pantry, enabling a wide range of intermediate-level dishes such as garlic butter chicken or stir-fries.",
+              "added_at": "2026-08-24T05:56:29.520173+00:00",
+              "purchased": false
+            },
+            {
+              "id": "bce93209-a30f-4330-b516-6c85e57c7e0e",
+              "user_id": "59a4cfb0-2e94-50b8-844e-3718517afa68",
+              "name": "olive oil",
+              "quantity": 500,
+              "unit": "ml",
+              "rationale": "Complements the chicken breast and eggs on hand as a versatile cooking staple needed across a wide range of intermediate recipes.",
+              "added_at": "2026-08-24T05:56:29.520173+00:00",
+              "purchased": false
+            }
+          ],
+          "scores": {
+            "rationale_specificity": 2,
+            "replenishment_accuracy": 2,
+            "complementarity": 2,
+            "novelty_balance": 1,
+            "no_duplicate_stocking": 2
+          },
+          "reasoning": {
+            "rationale_specificity": "Every rationale names either the specific recipe 'Chickpea chorizo and spinach stew' or specific pantry items like 'eggs and milk' or 'chicken breast', with no generic descriptions.",
+            "replenishment_accuracy": "All three ingredients used in the recent Chickpea chorizo and spinach stew (spinach, chickpeas, chorizo) are included in the shopping list.",
+            "complementarity": "Butter and flour complement the pantry's eggs and milk, garlic complements chicken breast, and olive oil pairs with both chicken and eggs for cooking.",
+            "novelty_balance": "The list is heavily weighted toward replenishment of the stew ingredients and complementary staples, with no clearly novel ingredient that introduces a new cuisine or ingredient type not previously encountered.",
+            "no_duplicate_stocking": "None of the well-stocked pantry items (chicken breast, eggs, milk) appear in the shopping list, and all suggested items are absent from the current pantry."
+          },
+          "total_score": 9.0,
+          "max_score": 10.0,
+          "normalised_score_0_to_100": 90.0,
+          "passed": true
+        },
+        {
+          "id": 2,
+          "output": [
+            {
+              "id": "672d09cb-7518-4840-8a6f-50fb6c4c6229",
+              "user_id": "59a4cfb0-2e94-50b8-844e-3718517afa68",
+              "name": "all-purpose flour",
+              "quantity": 1,
+              "unit": "kg",
+              "rationale": "Complements eggs, milk, and butter on hand to enable simple beginner-friendly recipes like pancakes or crepes.",
+              "added_at": "2026-08-24T05:56:46.552942+00:00",
+              "purchased": false
+            },
+            {
+              "id": "3913cede-7a82-4a4e-8961-16dad6961d42",
+              "user_id": "59a4cfb0-2e94-50b8-844e-3718517afa68",
+              "name": "sugar",
+              "quantity": 500,
+              "unit": "g",
+              "rationale": "Complements eggs, butter, and milk to round out basic baking recipes like simple cakes or cookies.",
+              "added_at": "2026-08-24T05:56:46.552942+00:00",
+              "purchased": false
+            },
+            {
+              "id": "a0ae9223-ac15-4922-99d1-291e7308a7b3",
+              "user_id": "59a4cfb0-2e94-50b8-844e-3718517afa68",
+              "name": "bread",
+              "quantity": 1,
+              "unit": "loaf",
+              "rationale": "Complements eggs and butter already on hand for quick and easy beginner meals like scrambled egg toast or French toast.",
+              "added_at": "2026-08-24T05:56:46.552942+00:00",
+              "purchased": false
+            },
+            {
+              "id": "6f1a1d44-9b29-42dc-b7ac-84e3e3300e92",
+              "user_id": "59a4cfb0-2e94-50b8-844e-3718517afa68",
+              "name": "cheddar cheese",
+              "quantity": 200,
+              "unit": "g",
+              "rationale": "Complements eggs and butter to enable simple beginner dishes like cheese omelettes or scrambled eggs with cheese.",
+              "added_at": "2026-08-24T05:56:46.552942+00:00",
+              "purchased": false
+            },
+            {
+              "id": "ef30bab1-e8d6-45d6-aba9-30086bf29e5d",
+              "user_id": "59a4cfb0-2e94-50b8-844e-3718517afa68",
+              "name": "baking powder",
+              "quantity": 1,
+              "unit": "unit",
+              "rationale": "Complements eggs, milk, butter, and flour to enable beginner baking staples like pancakes and simple muffins.",
+              "added_at": "2026-08-24T05:56:46.552942+00:00",
+              "purchased": false
+            }
+          ],
+          "scores": {
+            "rationale_specificity": 1,
+            "replenishment_accuracy": 0,
+            "complementarity": 2,
+            "novelty_balance": 0,
+            "no_duplicate_stocking": 2
+          },
+          "reasoning": {
+            "rationale_specificity": "Rationales reference specific pantry items by name (eggs, milk, butter) and name specific dishes (pancakes, crepes, French toast, cheese omelettes), but rely on the same generic 'complements X to enable Y' phrasing throughout rather than citing past recipes or purchase history.",
+            "replenishment_accuracy": "The recent history is empty, so there are no depleted or recently used items to replenish, making this criterion inapplicable; however, since no replenishment items can be identified, the list scores 0 by default as it cannot satisfy the criterion.",
+            "complementarity": "All five items (flour, sugar, bread, cheddar cheese, baking powder) directly complement the eggs, milk, and butter already stocked in the pantry, enabling coherent meal combinations.",
+            "novelty_balance": "With no recent cooking history, every item is technically 'novel,' but there are no replenishment items at all, making the list entirely one type rather than a clear mix of replenishment and novelty.",
+            "no_duplicate_stocking": "None of the suggested items (flour, sugar, bread, cheddar cheese, baking powder) duplicate the well-stocked pantry items (eggs, milk, butter), so there are no unnecessary inclusions."
+          },
+          "total_score": 5.0,
+          "max_score": 10.0,
+          "normalised_score_0_to_100": 50.0,
+          "passed": false
+        },
+        {
+          "id": 3,
+          "output": [
+            {
+              "id": "e0ee5019-c819-471c-a194-d1853902a487",
+              "user_id": "59a4cfb0-2e94-50b8-844e-3718517afa68",
+              "name": "soy sauce",
+              "quantity": 1,
+              "unit": "bottle",
+              "rationale": "Enables Broccoli Stir Fry, a dish cooked recently, which requires soy sauce not currently in the pantry.",
+              "added_at": "2026-08-24T05:57:11.680428+00:00",
+              "purchased": false
+            },
+            {
+              "id": "bcee9629-bcea-43ec-9651-c4abeb179cde",
+              "user_id": "59a4cfb0-2e94-50b8-844e-3718517afa68",
+              "name": "olive oil",
+              "quantity": 1,
+              "unit": "bottle",
+              "rationale": "Complements chicken breast, garlic, pasta, and vegetables already on hand as a foundational cooking fat for many dishes.",
+              "added_at": "2026-08-24T05:57:11.680428+00:00",
+              "purchased": false
+            },
+            {
+              "id": "d28de732-646e-4dae-9295-2a531c165579",
+              "user_id": "59a4cfb0-2e94-50b8-844e-3718517afa68",
+              "name": "canned diced tomatoes",
+              "quantity": 2,
+              "unit": "cans",
+              "rationale": "Complements chicken breast, garlic, onion, and pasta on hand to enable a simple chicken tomato pasta sauce.",
+              "added_at": "2026-08-24T05:57:11.680428+00:00",
+              "purchased": false
+            },
+            {
+              "id": "4f38c28b-508f-4129-bb50-60e9f5719b08",
+              "user_id": "59a4cfb0-2e94-50b8-844e-3718517afa68",
+              "name": "bell peppers",
+              "quantity": 3,
+              "unit": null,
+              "rationale": "Complements chicken breast, onion, garlic, and rice on hand to round out a chicken and vegetable stir fry or rice bowl.",
+              "added_at": "2026-08-24T05:57:11.680428+00:00",
+              "purchased": false
+            },
+            {
+              "id": "4ee4e72e-60c0-4cbb-a578-bb25930b8c09",
+              "user_id": "59a4cfb0-2e94-50b8-844e-3718517afa68",
+              "name": "lemon",
+              "quantity": 3,
+              "unit": null,
+              "rationale": "Complements chicken breast, garlic, spinach, and Greek yogurt already on hand for marinades, dressings, and finishing dishes.",
+              "added_at": "2026-08-24T05:57:11.680428+00:00",
+              "purchased": false
+            },
+            {
+              "id": "d01d6973-adf1-4fbc-a002-6b34492909ea",
+              "user_id": "59a4cfb0-2e94-50b8-844e-3718517afa68",
+              "name": "vegetable or chicken stock",
+              "quantity": 1,
+              "unit": "L",
+              "rationale": "Complements onion, garlic, carrots, potatoes, and chicken breast on hand to enable a hearty chicken and vegetable soup or stew.",
+              "added_at": "2026-08-24T05:57:11.680428+00:00",
+              "purchased": false
+            },
+            {
+              "id": "dac174f0-5ab6-43e8-a2c2-48aa30e820db",
+              "user_id": "59a4cfb0-2e94-50b8-844e-3718517afa68",
+              "name": "parmesan cheese",
+              "quantity": 150,
+              "unit": "g",
+              "rationale": "Complements pasta, butter, garlic, and eggs already on hand to enable a carbonara or cacio e pepe style pasta dish.",
+              "added_at": "2026-08-24T05:57:11.680428+00:00",
+              "purchased": false
+            },
+            {
+              "id": "1dbd2398-4d98-44c3-bf55-4f25ac04f70f",
+              "user_id": "59a4cfb0-2e94-50b8-844e-3718517afa68",
+              "name": "banana",
+              "quantity": 4,
+              "unit": null,
+              "rationale": "Complements oats, milk, and Greek yogurt already on hand for a quick breakfast smoothie or oat-based breakfast bowl.",
+              "added_at": "2026-08-24T05:57:11.680428+00:00",
+              "purchased": false
+            }
+          ],
+          "scores": {
+            "rationale_specificity": 2,
+            "replenishment_accuracy": 2,
+            "complementarity": 2,
+            "novelty_balance": 1,
+            "no_duplicate_stocking": 2
+          },
+          "reasoning": {
+            "rationale_specificity": "Every rationale names specific pantry items (e.g., 'chicken breast, garlic, pasta') or specific recent recipes (e.g., 'Broccoli Stir Fry') rather than using generic descriptions.",
+            "replenishment_accuracy": "Soy sauce, the only ingredient used in recent history (Broccoli Stir Fry) that was not in the pantry, is correctly identified and included in the list.",
+            "complementarity": "Multiple items such as canned diced tomatoes, parmesan cheese, and chicken stock clearly complement specific named pantry items like pasta, eggs, onion, garlic, carrots, and potatoes.",
+            "novelty_balance": "The list is heavily weighted toward complementary/replenishment items, with banana being the only clearly novel ingredient not connected to recent cooking history, making novelty minimal.",
+            "no_duplicate_stocking": "No items already well-stocked in the pantry (chicken breast, eggs, milk, butter, pasta, rice, onion, garlic, cheddar, yogurt, spinach, broccoli, carrots, potatoes, oats) appear unnecessarily in the list."
+          },
+          "total_score": 9.0,
+          "max_score": 10.0,
+          "normalised_score_0_to_100": 90.0,
+          "passed": true
+        },
+        {
+          "id": 4,
+          "output": [
+            {
+              "id": "f4774815-1f5d-4072-a49e-aaf99fb716f7",
+              "user_id": "59a4cfb0-2e94-50b8-844e-3718517afa68",
+              "name": "pasta",
+              "quantity": 500,
+              "unit": "g",
+              "rationale": "Enables Pasta Bolognese, which you have cooked recently, and is not currently in your pantry.",
+              "added_at": "2026-08-24T05:57:41.902948+00:00",
+              "purchased": false
+            },
+            {
+              "id": "005472f7-4779-4e57-ae7d-257ec8ceef53",
+              "user_id": "59a4cfb0-2e94-50b8-844e-3718517afa68",
+              "name": "ground beef",
+              "quantity": 500,
+              "unit": "g",
+              "rationale": "Enables Pasta Bolognese, which you have cooked recently, and is not currently in your pantry.",
+              "added_at": "2026-08-24T05:57:41.902948+00:00",
+              "purchased": false
+            },
+            {
+              "id": "ea85e9fd-429b-4151-a2c3-b25e6ec84b67",
+              "user_id": "59a4cfb0-2e94-50b8-844e-3718517afa68",
+              "name": "passata",
+              "quantity": 1,
+              "unit": "jar",
+              "rationale": "Enables Pasta Bolognese, which you have cooked recently, and is not currently in your pantry.",
+              "added_at": "2026-08-24T05:57:41.902948+00:00",
+              "purchased": false
+            },
+            {
+              "id": "442a5e3d-4260-4059-af11-6b487e1b4f1d",
+              "user_id": "59a4cfb0-2e94-50b8-844e-3718517afa68",
+              "name": "onion",
+              "quantity": 3,
+              "unit": null,
+              "rationale": "Replenishes onions, which are running low with only one remaining, and are used frequently in dishes like Pasta Bolognese.",
+              "added_at": "2026-08-24T05:57:41.902948+00:00",
+              "purchased": false
+            },
+            {
+              "id": "6d0b2caf-8ace-4f8f-98f5-4b3d0d446091",
+              "user_id": "59a4cfb0-2e94-50b8-844e-3718517afa68",
+              "name": "garlic",
+              "quantity": 1,
+              "unit": "bulb",
+              "rationale": "Replenishes garlic to ensure you have enough on hand, as it is a staple used in Pasta Bolognese and many other dishes.",
+              "added_at": "2026-08-24T05:57:41.902948+00:00",
+              "purchased": false
+            },
+            {
+              "id": "9b57dc21-1d4e-4a66-aa6c-dd247b8cc7a6",
+              "user_id": "59a4cfb0-2e94-50b8-844e-3718517afa68",
+              "name": "carrot",
+              "quantity": 3,
+              "unit": null,
+              "rationale": "Complements the garlic and onion already in your pantry to build a classic soffritto base, rounding out a variety of recipes including a richer Pasta Bolognese.",
+              "added_at": "2026-08-24T05:57:41.902948+00:00",
+              "purchased": false
+            },
+            {
+              "id": "2b4d11fa-aa76-46a1-95c4-3d566a251917",
+              "user_id": "59a4cfb0-2e94-50b8-844e-3718517afa68",
+              "name": "celery",
+              "quantity": 1,
+              "unit": "bunch",
+              "rationale": "Complements the garlic, onion, and carrot to complete a soffritto base, which pairs well with what is already in your pantry.",
+              "added_at": "2026-08-24T05:57:41.902948+00:00",
+              "purchased": false
+            }
+          ],
+          "scores": {
+            "rationale_specificity": 2,
+            "replenishment_accuracy": 2,
+            "complementarity": 2,
+            "novelty_balance": 1,
+            "no_duplicate_stocking": 1
+          },
+          "reasoning": {
+            "rationale_specificity": "Every rationale references either the specific recipe 'Pasta Bolognese' or specific pantry items like garlic, onion, and carrot by name.",
+            "replenishment_accuracy": "All three depleted ingredients from the Pasta Bolognese recipe (pasta, ground beef, passata) are included in the list.",
+            "complementarity": "Carrot and celery explicitly complement the existing garlic and onion to form a soffritto base, directly building on pantry stock.",
+            "novelty_balance": "Carrot and celery add some novelty, but they are closely tied to Bolognese variations rather than being truly new cuisine directions, making the novelty minimal.",
+            "no_duplicate_stocking": "Garlic is listed as not depleted with 1 bulb remaining and is still added to the shopping list, which is a borderline unnecessary inclusion."
+          },
+          "total_score": 8.0,
+          "max_score": 10.0,
+          "normalised_score_0_to_100": 80.0,
+          "passed": true
+        },
+        {
+          "id": 5,
+          "output": [
+            {
+              "id": "7e0b8457-da1e-4748-ad90-5021c80eb969",
+              "user_id": "59a4cfb0-2e94-50b8-844e-3718517afa68",
+              "name": "chicken breast",
+              "quantity": 600,
+              "unit": "g",
+              "rationale": "Replenishing chicken breast, which is running low at 200g and is a staple used in all three recently cooked dishes.",
+              "added_at": "2026-08-24T05:57:59.631222+00:00",
+              "purchased": false
+            },
+            {
+              "id": "06e5ee90-97d2-43bf-9375-9434e60e656d",
+              "user_id": "59a4cfb0-2e94-50b8-844e-3718517afa68",
+              "name": "spinach",
+              "quantity": 150,
+              "unit": "g",
+              "rationale": "Enabling Chicken salad and Chicken stir fry, both past dishes that use spinach alongside chicken breast already in the pantry.",
+              "added_at": "2026-08-24T05:57:59.631222+00:00",
+              "purchased": false
+            },
+            {
+              "id": "1f329e54-f0d4-4a1d-98c4-e3759d83e376",
+              "user_id": "59a4cfb0-2e94-50b8-844e-3718517afa68",
+              "name": "lemon",
+              "quantity": 3,
+              "unit": "whole",
+              "rationale": "Enabling Chicken salad, a recently cooked dish that requires lemon which is not currently in the pantry.",
+              "added_at": "2026-08-24T05:57:59.631222+00:00",
+              "purchased": false
+            },
+            {
+              "id": "2529123c-f82e-410f-97bb-f63e70f093e0",
+              "user_id": "59a4cfb0-2e94-50b8-844e-3718517afa68",
+              "name": "coconut milk",
+              "quantity": 400,
+              "unit": "ml",
+              "rationale": "Enabling Chicken curry, a recently cooked dish that requires coconut milk which is not currently in the pantry.",
+              "added_at": "2026-08-24T05:57:59.631222+00:00",
+              "purchased": false
+            },
+            {
+              "id": "35a87503-c447-484a-8371-06dadc44b8b8",
+              "user_id": "59a4cfb0-2e94-50b8-844e-3718517afa68",
+              "name": "curry paste",
+              "quantity": 1,
+              "unit": "jar",
+              "rationale": "Enabling Chicken curry, a recently cooked dish that requires curry paste which is not currently in the pantry.",
+              "added_at": "2026-08-24T05:57:59.631222+00:00",
+              "purchased": false
+            },
+            {
+              "id": "3f7380b8-1a18-452e-be35-70e6e8823860",
+              "user_id": "59a4cfb0-2e94-50b8-844e-3718517afa68",
+              "name": "soy sauce",
+              "quantity": 1,
+              "unit": "bottle",
+              "rationale": "Enabling Chicken stir fry, a recently cooked dish that requires soy sauce which is not currently in the pantry.",
+              "added_at": "2026-08-24T05:57:59.631222+00:00",
+              "purchased": false
+            },
+            {
+              "id": "879cf971-bcea-4fae-ac71-67983bf8202c",
+              "user_id": "59a4cfb0-2e94-50b8-844e-3718517afa68",
+              "name": "butter",
+              "quantity": 250,
+              "unit": "g",
+              "rationale": "Complementing the eggs already in the pantry, as butter is a foundational ingredient that pairs with eggs across many intermediate-level dishes such as omelettes and frittatas.",
+              "added_at": "2026-08-24T05:57:59.631222+00:00",
+              "purchased": false
+            }
+          ],
+          "scores": {
+            "rationale_specificity": 2,
+            "replenishment_accuracy": 2,
+            "complementarity": 2,
+            "novelty_balance": 2,
+            "no_duplicate_stocking": 1
+          },
+          "reasoning": {
+            "rationale_specificity": "Every rationale names specific recipes (e.g., 'Chicken stir fry', 'Chicken curry', 'Chicken salad') or specific pantry items (e.g., 'eggs already in the pantry'), with no generic descriptions.",
+            "replenishment_accuracy": "All depleted or missing ingredients from recent recipes\u2014spinach (depleted), soy sauce, coconut milk, curry paste, and lemon\u2014are included in the list.",
+            "complementarity": "Butter pairs with the 12 eggs already in the pantry, and spinach/lemon complement the existing chicken breast stock for salad and stir fry.",
+            "novelty_balance": "Butter is a novel ingredient not used in any recent recipe, while the remaining items replenish depleted or missing ingredients from recent cooking history.",
+            "no_duplicate_stocking": "Chicken breast is listed for replenishment at 600g despite 200g still being available and marked as not depleted, making this a borderline over-stock inclusion."
+          },
+          "total_score": 9.0,
+          "max_score": 10.0,
+          "normalised_score_0_to_100": 90.0,
+          "passed": true
+        }
+      ]
+    }
+  }
+}
