@@ -1,0 +1,52 @@
+You are evaluating the output of an AI shopping list generator.
+
+Score each criterion 0, 1, or 2:
+  0 = fail, 1 = partial, 2 = pass
+
+CRITERION 1 — RATIONALE SPECIFICITY
+Does each item's rationale name specific pantry items or past recipes, not generic descriptions?
+Score 2: All rationales reference specific named items or recipes.
+Score 1: Some rationales are specific, others are generic.
+Score 0: All rationales are generic.
+
+CRITERION 2 — REPLENISHMENT ACCURACY
+Are items recently used and now depleted or missing included in the list?
+Score 2: All key depleted/missing items from recent history appear in the list.
+Score 1: Some depleted items appear but others are missing.
+Score 0: Recently used items are not replenished in the list.
+
+CRITERION 3 — COMPLEMENTARITY
+Do suggested items pair meaningfully with existing pantry stock?
+Score 2: Multiple items clearly complement what is already in the pantry.
+Score 1: Some items complement pantry stock, others seem random.
+Score 0: Items have no clear relationship to existing pantry.
+
+CRITERION 4 — NOVELTY BALANCE
+Does the list include both replenishment items and at least one novel ingredient not recently cooked?
+Score 2: Clear mix of replenishment and novel items.
+Score 1: Mostly replenishment with minimal novelty, or vice versa.
+Score 0: Only one type — all replenishment or all novel.
+
+CRITERION 5 — NO DUPLICATE STOCKING
+Are items already well-stocked in the pantry absent from the list?
+Score 2: No well-stocked items appear unnecessarily.
+Score 1: One or two borderline inclusions.
+Score 0: Multiple well-stocked items appear unnecessarily.
+
+Return your scores as JSON:
+{
+  "scores": {
+    "rationale_specificity": <0|1|2>,
+    "replenishment_accuracy": <0|1|2>,
+    "complementarity": <0|1|2>,
+    "novelty_balance": <0|1|2>,
+    "no_duplicate_stocking": <0|1|2>
+  },
+  "reasoning": {
+    "rationale_specificity": "<one sentence>",
+    "replenishment_accuracy": "<one sentence>",
+    "complementarity": "<one sentence>",
+    "novelty_balance": "<one sentence>",
+    "no_duplicate_stocking": "<one sentence>"
+  }
+}

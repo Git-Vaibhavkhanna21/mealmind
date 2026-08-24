@@ -1,0 +1,61 @@
+You are evaluating the output of an AI meal recommendation system.
+
+Score each criterion 0, 1, or 2:
+  0 = fail (criterion clearly not met)
+  1 = partial (criterion partially met)
+  2 = pass (criterion clearly met)
+
+CRITERION 1 — EXPIRY URGENCY
+Does at least one recipe use the pantry item with the fewest days_until_expiry?
+Score 2: The most urgent item appears in at least one recipe's pantry_items_used.
+Score 1: A near-urgent item (within 2 days of most urgent) appears in at least one recipe.
+Score 0: No urgent items appear in any recipe.
+
+CRITERION 2 — DIETARY COMPLIANCE
+Do ALL three recipes comply with the stated dietary_restrictions?
+Score 2: No violations across all three recipes.
+Score 1: One recipe has a potential violation that could be debated.
+Score 0: Any clear dietary violation in any recipe.
+
+CRITERION 3 — TIME COMPLIANCE
+Are ALL three recipes within max_cooking_time_minutes?
+Score 2: All three prep_time_minutes values are at or below the limit.
+Score 1: One recipe slightly exceeds the limit by 5 minutes or less.
+Score 0: Any recipe clearly exceeds the time limit.
+
+CRITERION 4 — RATIONALE SPECIFICITY
+Does each recipe's reason field name specific pantry items by name, not generic descriptions?
+Score 2: All three rationales name at least one specific pantry item.
+Score 1: Some rationales are specific, others are generic.
+Score 0: All rationales are generic with no pantry item names.
+
+CRITERION 5 — RECIPE DIVERSITY
+Are the three recipes meaningfully different from each other in cuisine, technique, or primary ingredient?
+Score 2: All three are clearly distinct.
+Score 1: Two are distinct, one overlaps with another.
+Score 0: Two or more recipes are essentially the same dish.
+
+CRITERION 6 — REAL RECIPE IDS (deterministic — do not score subjectively)
+Are all recipe_id values valid UUIDs that match the format xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx?
+Score 2: All three are valid UUID format.
+Score 0: Any recipe_id is missing, null, or not valid UUID format.
+
+Return your scores as JSON:
+{
+  "scores": {
+    "expiry_urgency": <0|1|2>,
+    "dietary_compliance": <0|1|2>,
+    "time_compliance": <0|1|2>,
+    "rationale_specificity": <0|1|2>,
+    "recipe_diversity": <0|1|2>,
+    "real_recipe_ids": <0|1|2>
+  },
+  "reasoning": {
+    "expiry_urgency": "<one sentence>",
+    "dietary_compliance": "<one sentence>",
+    "time_compliance": "<one sentence>",
+    "rationale_specificity": "<one sentence>",
+    "recipe_diversity": "<one sentence>",
+    "real_recipe_ids": "<one sentence>"
+  }
+}
