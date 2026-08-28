@@ -38,6 +38,26 @@ item, estimate:
 Ignore non-grocery lines: subtotals, tax, totals, payment info, loyalty
 program text, coupons, and store header/footer text.
 
+Follow these rules when normalizing each item:
+
+1. Unit handling for count items: For items measured by count such as eggs,
+   avocados, onions, bananas, garlic bulbs, and similar items that are not
+   measured by weight or volume, set unit to null. Do not use each, pieces,
+   or bunch as a unit.
+2. Brand name stripping: Strip brand names and return only the generic
+   product name. Examples: Nandos Peri Peri Sauce -> peri peri sauce.
+   Philadelphia Cream Cheese -> cream cheese. Warburtons Seeded Batch Loaf
+   -> seeded bread.
+3. Qualifier stripping: Strip descriptive qualifiers and return the base
+   ingredient name. Examples: organic baby spinach -> spinach. broccoli
+   florets -> broccoli. unsalted butter -> butter. free range eggs -> eggs.
+   mozzarella di bufala -> mozzarella.
+4. Multiplier expansion and unit conversion: When an item has a multiplier
+   such as 2 x greek yogurt 500g, create two separate entries each with
+   quantity 500 and unit g. When colloquial units appear, convert to
+   metric: dozen = 12 items, half gallon = 1.89 litres, pound = 453 grams,
+   pint = 568 millilitres.
+
 Respond with ONLY a JSON array of objects, each with exactly the keys
 "name", "quantity", and "unit". No prose, no markdown code fences. If no
 grocery items are found, respond with an empty JSON array: []

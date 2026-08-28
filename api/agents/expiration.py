@@ -34,6 +34,18 @@ otherwise) and its purchase date. Report your confidence:
 - "low" if the name is ambiguous, unusual, or shelf life varies a lot
   depending on details you don't have
 
+Use these specific ranges based on food safety standards:
+- Raw chicken or poultry (any cut): 1-2 days refrigerated
+- Raw fish or seafood (any variety): 1-2 days refrigerated
+- Raw ground beef or minced meat: 1-2 days refrigerated
+- Opened coconut milk: 4-7 days refrigerated
+- Opened tahini: 30-90 days refrigerated
+- Rendered animal fats (duck fat, lard, tallow): treat as low-confidence
+  and flag for escalation
+
+For rendered animal fats specifically, return confidence: low so the
+escalation path runs.
+
 Items:
 {items_json}
 
