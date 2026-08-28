@@ -459,7 +459,7 @@ def eval_deduction() -> dict[str, Any]:
             )
             plan = pantry_deductor.build_deduction_plan(recipe_id, EVAL_USER_ID)
 
-            actual_match = len(plan) > 0
+            actual_match = any(entry.get("match_found") for entry in plan)
             results.append(
                 {
                     "id": case["id"],
