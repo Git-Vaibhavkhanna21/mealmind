@@ -35,6 +35,12 @@ from mcp_servers import pantry_inventory  # noqa: E402
 MODEL = "claude-haiku-4-5-20251001"
 MAX_TOKENS = 2048
 
+# Below this, a Haiku match is treated as no-match rather than trusted — see
+# `build_deduction_plan`. Chosen because 0.7-ish confidence scores have shown
+# up in practice on matches that are wrong (natural yogurt vs. Greek yogurt,
+# spring onions vs. red onion), not just uncertain-but-right.
+CONFIDENCE_FLOOR = 0.75
+
 _DEDUCTION_INSTRUCTIONS = """\
 You are matching recipe ingredients to a user's pantry inventory so the
 right quantities can be deducted after cooking.
@@ -60,6 +66,12 @@ report:
 
 Skip recipe ingredients with no plausible pantry match (the user doesn't
 have anything like it in stock) — don't include them in the output.
+
+Spring onions, scallions, and green onions are NOT the same as red onion,
+white onion, or yellow onion — return no-match. Natural yogurt is NOT the
+same as Greek yogurt — they have different fat content and culinary
+properties — return no-match. Crème fraîche is NOT the same as sour cream
+or yogurt — return no-match.
 
 Respond with ONLY a JSON array of objects, each with exactly the keys
 "pantry_item_id", "pantry_item_name", "quantity_to_deduct", "unit", and
@@ -119,8 +131,13 @@ def build_deduction_plan(recipe_id: str, user_id: str) -> list[dict[str, Any]]:
     """Fuzzy-match a recipe's ingredients against the user's pantry stock.
 
     Returns `[{pantry_item_id, pantry_item_name, quantity_to_deduct, unit,
-    confidence}]` — nothing is deducted yet, this is the plan for the user
-    to review.
+    confidence, match_found}]` — nothing is deducted yet, this is the plan
+    for the user to review. Entries below `CONFIDENCE_FLOOR` are kept (not
+    dropped) so the PM can see which ingredients had no match, but are
+    forced to `match_found: False` with `pantry_item_id`/`quantity_to_deduct`
+    zeroed out — the prompt asks Haiku not to guess on lookalikes like
+    "spring onions" vs. "red onion", but confidence floors exist for when a
+    model ignores an instruction anyway, not just for when it complies.
     """
     recipe = get_recipe(recipe_id)
     pantry_items = pantry_inventory.list_items(user_id)
@@ -145,7 +162,17 @@ def build_deduction_plan(recipe_id: str, user_id: str) -> list[dict[str, Any]]:
         model=MODEL, max_tokens=MAX_TOKENS, messages=[{"role": "user", "content": prompt}]
     )
     response_text = "".join(block.text for block in response.content if block.type == "text")
-    return _extract_json_list(response_text)
+    items = _extract_json_list(response_text)
+
+    for item in items:
+        if item.get("confidence", 0) < CONFIDENCE_FLOOR:
+            item["pantry_item_id"] = None
+            item["quantity_to_deduct"] = 0
+            item["match_found"] = False
+        else:
+            item["match_found"] = True
+
+    return items
 
 
 def _mark_cooked(supabase: Client, user_id: str, recipe_id: str) -> None:
@@ -188,6 +215,9 @@ def apply_deduction(
     updated_items: list[dict[str, Any]] = []
 
     for entry in plan:
+        if not entry.get("match_found", True):
+            continue
+
         pantry_item_id = entry["pantry_item_id"]
         current = (
             supabase.table("pantry_items")
