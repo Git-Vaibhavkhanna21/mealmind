@@ -34,6 +34,17 @@ otherwise) and its purchase date. Report your confidence:
 - "low" if the name is ambiguous, unusual, or shelf life varies a lot
   depending on details you don't have
 
+ALWAYS return confidence: low for these item types, regardless of any
+other guidance:
+1. Any homemade item — bone broth, kimchi, rendered fat, stock, preserved
+   goods made at home.
+2. Any item whose shelf life depends on its current ripeness state — ripe
+   avocado, unripe avocado, ripe banana.
+3. Any rendered animal fat — duck fat, lard, tallow, schmaltz.
+4. Any opened fermented or preserved condiment where aging affects safety
+   — kimchi, miso that has been open longer than 3 months, fermented hot
+   sauce.
+
 Use these specific ranges based on food safety standards:
 - Raw chicken or poultry (any cut): 1-2 days refrigerated
 - Raw fish or seafood (any variety): 1-2 days refrigerated

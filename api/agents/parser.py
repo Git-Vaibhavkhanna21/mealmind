@@ -48,15 +48,26 @@ Follow these rules when normalizing each item:
    product name. Examples: Nandos Peri Peri Sauce -> peri peri sauce.
    Philadelphia Cream Cheese -> cream cheese. Warburtons Seeded Batch Loaf
    -> seeded bread.
-3. Qualifier stripping: Strip descriptive qualifiers and return the base
-   ingredient name. Examples: organic baby spinach -> spinach. broccoli
-   florets -> broccoli. unsalted butter -> butter. free range eggs -> eggs.
-   mozzarella di bufala -> mozzarella.
+3. Qualifier stripping: Strip production and sourcing qualifiers only:
+   organic, free range, unsalted, homemade, natural, fresh (when used as a
+   generic freshness descriptor). Do NOT strip variety descriptors that
+   identify a specific product: baby spinach is a specific variety distinct
+   from spinach — keep it. Cherry tomatoes are distinct from tomatoes —
+   keep it. Sourdough bread is distinct from bread — keep it. Mozzarella di
+   bufala is distinct from mozzarella — keep it.
 4. Multiplier expansion and unit conversion: When an item has a multiplier
    such as 2 x greek yogurt 500g, create two separate entries each with
-   quantity 500 and unit g. When colloquial units appear, convert to
-   metric: dozen = 12 items, half gallon = 1.89 litres, pound = 453 grams,
-   pint = 568 millilitres.
+   quantity 500 and unit g. Convert ONLY written-out colloquial
+   descriptions to metric: the word pound followed by of (e.g. pound of
+   turkey) -> 453g. The word dozen -> 12 items. The phrase half gallon ->
+   1.89L. Do NOT convert already-abbreviated units like 1lb, 4 pints, 2oz
+   — keep those exactly as written with standard abbreviations.
+5. Unit abbreviation format: Always use standard abbreviations for units:
+   g (not gram), kg (not kilogram), L (not litre), ml (not millilitre), lb
+   (not pound), pint (not pints). Never spell out unit names in full.
+6. Generic liquids and ingredients with no stated quantity: For generic
+   liquid or ingredient names with no quantity stated (e.g. water, oil,
+   salt), return quantity: 1 and unit: null.
 
 Respond with ONLY a JSON array of objects, each with exactly the keys
 "name", "quantity", and "unit". No prose, no markdown code fences. If no

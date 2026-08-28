@@ -151,3 +151,100 @@ them was outside this cycle's scope:
   covered by the new guidance. Rendered duck fat (case 21) now escalates
   correctly but the Sonnet subagent's own date estimate is still 6x too
   long — `_SUBAGENT_INSTRUCTIONS` wasn't touched this cycle.
+
+## Cycle 5 — Second hardening pass: unit precision and escalation override (PR #27, second commit)
+
+**Observed:** Cycle 4's re-measurement (60% Receipt Parsing, 73%
+Expiration) fell short of the 80%/75% promotion bar, and two of Cycle 4's
+own fixes had side effects: unit conversion applied to already-abbreviated
+units, qualifier-stripping erased fixture-significant variety names, and
+the new expiration food-safety ranges raised general model confidence
+enough to undo three escalation cases the harness had just confirmed were
+correct.
+
+**Measured:** Receipt Parsing 9/15 (60%). Expiration 19/26 (73%).
+
+**Diagnosed:** Cycle 4's parser rule 4 didn't distinguish "convert this
+colloquial phrase" from "leave this abbreviation alone," so `1lb` and `4
+pints` got converted anyway. Cycle 4's rule 3 (qualifier stripping) had no
+concept of a variety name vs. a sourcing adjective, so `baby spinach` and
+`fresh basil` lost meaningful parts of their name. Converted units came
+back as full words (`litre`, `gram`) with no rule enforcing abbreviated
+form. `"water"` had no explicit no-quantity-stated example to anchor
+`quantity: 1, unit: null`. On the expiration side, the food-safety ranges
+added general confidence without a hard floor for the specific item
+categories (homemade goods, ripeness-dependent produce, rendered fats,
+aging fermented condiments) that need to stay low-confidence regardless of
+what else the prompt says.
+
+**Fix:**
+
+- `api/agents/parser.py`: replaced the qualifier-stripping rule with a
+  narrower one — strip only production/sourcing qualifiers (organic, free
+  range, unsalted, homemade, natural, generic "fresh") and explicitly keep
+  variety-identifying names (baby spinach, cherry tomatoes, sourdough
+  bread, mozzarella di bufala). Replaced the conversion rule so it only
+  fires on written-out colloquial phrases (`pound of X`, `dozen`, `half
+  gallon`) and explicitly leaves already-abbreviated units (`1lb`, `4
+  pints`, `2oz`) untouched. Added a standard-abbreviation rule (`g`, `kg`,
+  `L`, `ml`, `lb`, `pint` — never the spelled-out form). Added an explicit
+  no-stated-quantity example for generic liquids/ingredients (water, oil,
+  salt → `quantity: 1, unit: null`).
+- `api/agents/expiration.py`: added a hard override block *before* the
+  food-safety ranges — always report `confidence: low` for homemade items,
+  ripeness-dependent produce, rendered animal fats, and aging fermented
+  condiments (miso open >3 months, kimchi, fermented hot sauce),
+  regardless of what the rest of the prompt says.
+
+**Re-measured:** Receipt Parsing 13/15 (87%) — clears the 80% bar.
+Expiration 19/26 (73%) — same pass *rate* as Cycle 4, but a different set
+of failing cases; still short of the 75% bar. Because the combined
+condition (Receipt Parsing ≥ 80% **and** Expiration ≥ 75%) requires both,
+`baseline.json` was **not** created this cycle either.
+
+Remaining findings, not chased further (outside this cycle's two-fix
+scope):
+
+- Receipt Parsing's 2 remaining failures are narrower versions of Cycle
+  4's problem: `broccoli florets` → fixture wants `broccoli`, but
+  "florets" is neither a listed sourcing qualifier nor a listed variety
+  name, so the new rule leaves it untouched; `mozzarella di bufala` is now
+  *explicitly* kept by name per this cycle's own instruction, but the
+  fixture (unchanged since Cycle 1) still expects it collapsed to
+  `mozzarella` — a genuine conflict between this cycle's instructions and
+  the existing fixture, not a bug in either the prompt or the harness.
+- Expiration's failing set shifted rather than shrank: cases 12 (avocado
+  unripe) and 20 (bone broth) are now fixed by the override block, but
+  case 17 (miso paste, opened — no duration stated) newly regressed,
+  likely because the override's "miso open longer than 3 months" clause
+  bled into the underspecified generic case; case 24 (oat milk, opened)
+  newly regressed with no rule change touching dairy alternatives at all,
+  suggesting some of this is ordinary run-to-run model variance rather
+  than a prompt effect. Case 16 (red curry paste) still doesn't escalate —
+  it's a condiment but not a *fermented* one, so it falls outside every
+  override clause as literally written. Cheddar cheese (7), garlic (13),
+  and rendered duck fat's Sonnet subagent estimate (21, now escalating
+  correctly but ~4 days over its range) remain unaddressed, same as Cycle
+  4.
+- Deduction dropped from 93% to 79% and Shopping List rose from 80% to
+  100% between these two runs despite neither `deduction.json`,
+  `shopping_list.json`, `pantry_deductor.py`, nor `shopping_list.py` being
+  touched in either cycle — both components call live, non-deterministic
+  LLM judgment (Haiku confidence matching, Sonnet-judged rubric scoring),
+  so some run-to-run swing on them is expected and isn't evidence of a
+  regression from this cycle's changes.
+
+**Combined delta across Cycles 2, 4, and 5** (first harness run → after
+both hardening passes):
+
+| Component | Cycle 2 (first run) | Cycle 4 | Cycle 5 |
+|---|---|---|---|
+| Receipt Parsing | 2/15 (13%) | 9/15 (60%) | 13/15 (87%) |
+| Expiration | 13/26 (50%) | 19/26 (73%) | 19/26 (73%) |
+
+Receipt Parsing: +74 points over two cycles, now above threshold.
+Expiration: +23 points over two cycles, still 2 points under threshold —
+the remaining gap is concentrated in items no rule in either cycle
+targets (cheddar, garlic) and one subagent estimate that was never in
+scope (rendered duck fat's actual date, as opposed to its
+escalation/confidence, which is now correct).
