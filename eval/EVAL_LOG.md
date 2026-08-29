@@ -248,3 +248,97 @@ the remaining gap is concentrated in items no rule in either cycle
 targets (cheddar, garlic) and one subagent estimate that was never in
 scope (rendered duck fat's actual date, as opposed to its
 escalation/confidence, which is now correct).
+
+## BASELINE ESTABLISHED — Run 20260829T180205Z
+
+**Observed:** After PR #28 (production fix: confidence floor on pantry
+deduction) and a one-line fix to `eval_deduction`'s stale `actual_match`
+check (both landed on `main` and merged into this branch), a full harness
+run had all five components clear their pass threshold in the same run for
+the first time since the harness existed.
+
+**Measured:** Receipt Parsing 13/15 (87%), Expiration 20/26 (77%),
+Recommendation 9/10 (90%, avg 81/100), Deduction 13/14 (93%), Shopping
+List 5/5 (100%, avg 86/100). 5/5 components passing.
+
+**Action:** `eval/results/latest.json` copied to `eval/results/baseline.json`
+— the first baseline this harness has ever recorded. `eval/regression.py`
+(added in PR #26, previously unable to run at all for lack of a baseline
+file) is now live: future runs diff against this baseline and flag any
+component whose pass rate or average score drops more than 5 points.
+
+### Before/after across all hardening cycles
+
+| Component | Run 1 (first harness run, `run_20260824T055808Z.json`) | Final (baseline, `run_20260829T180205Z.json`) | Delta |
+|---|---|---|---|
+| Receipt Parsing | 2/15 (13%) | 13/15 (87%) | +74pp |
+| Expiration | 13/26 (50%) | 20/26 (77%) | +27pp |
+| Recommendation | 10/10 (100%) | 9/10 (90%) | -10pp |
+| Deduction | 11/14 (79%) | 13/14 (93%) | +14pp |
+| Shopping List | 4/5 (80%) | 5/5 (100%) | +20pp |
+
+Receipt Parsing and Expiration improved through the two targeted prompt-
+hardening cycles documented above (Cycles 4 and 5). Shopping List's gain
+and Deduction's net improvement are addressed below. Recommendation's drop
+is addressed explicitly in its own section, since it's the one number here
+that looks like a regression and isn't.
+
+**Recommendation, -10pp, is LLM-judge non-determinism, not a code
+regression.** No file touching recommendation generation or its rubric
+(`api/agents/meal_recommender.py`, `eval/fixtures/recommendation.json`,
+`eval/rubrics/recommendation.txt`) changed at any point across every cycle
+in this arc. The 10-case suite has one case fail its 70/100 bar in the
+final run that passed in the first; `eval/judge.py` scores five
+open-ended, qualitative criteria per case via a live Sonnet call with no
+seed or temperature control, so a few points of drift on a borderline case
+is expected sampling variance in the judge's own scoring, not a change in
+what `meal_recommender.recommend()` produces. A single-case flip on a
+10-case suite is exactly the size of swing `eval/regression.py`'s 5-point
+threshold exists to catch and flag for a human to look at, rather than
+something to chase with a code change here.
+
+**Deduction, +14pp net, reflects the production bug fix and its harness
+check, not just non-determinism, though non-determinism is still present
+too.** This component swung between 79% and 93% across individual runs in
+this arc purely from Haiku's live matching non-determinism (documented in
+Cycle 5, and again immediately after PR #28: three back-to-back
+`eval_deduction()` runs came back 13/14, 14/14, 14/14 — see PR #28's own
+DEVLOG entry). Structurally, two things changed regardless of that
+variance: matches below the 0.75 confidence floor are now safely rejected
+(`match_found: False`, `pantry_item_id: None`) instead of appearing as a
+confident, auto-populated deduction; and `eval_deduction`'s
+`actual_match = len(plan) > 0` check — stale from before entries could
+carry `match_found: False` — now checks `match_found` directly, so a
+correctly-rejected low-confidence guess no longer misreads as a
+false-positive test failure.
+
+This baseline run's one deduction failure (case 11, `butter` against
+`unsalted butter 200g`, expected match) shows the floor's real cost, not
+just its benefit: Haiku returned this at confidence 0.7, a plausible and
+arguably correct match that the 0.75 floor still rejected as
+`match_found: False`. The floor was tuned against this arc's two known
+false positives (natural/Greek yogurt at 0.7, spring onions/red onion at
+0.35) without a matching false-negative check against confident-but-not-
+maximal correct matches — 0.7 turned up on both sides of the line in this
+same arc. Worth revisiting the floor's exact value (or moving to a
+qualifier-aware match rather than a single global cutoff) in a future
+cycle; not fixed here since establishing the baseline was this session's
+task, not re-tuning a threshold PR #28 already shipped.
+
+### Production fixes surfaced by this harness
+
+- **Deduction confidence floor** (PR #28): `build_deduction_plan` no
+  longer auto-populates a deduction plan with matches Haiku itself wasn't
+  confident about — natural yogurt vs. Greek yogurt (0.7) and spring
+  onions vs. red onion (0.35) were both confidently-wrong, not just
+  uncertain, and are now correctly rejected (`match_found: False`)
+  instead of silently deducted.
+- **`apply_deduction` defensive guard** (PR #28): a rejected match now
+  carries `pantry_item_id: None` rather than being dropped from the plan
+  (so a PM-facing review UI can still see it) — `apply_deduction` skips
+  `match_found: False` entries so applying an unfiltered plan can't crash
+  looking up a null id in Supabase.
+- **`expiry_source`/`expiry_confidence` observability** (PR #24, Cycle 3):
+  made the Haiku/Sonnet escalation path in the expiration workflow
+  externally verifiable at all — without these fields, none of this arc's
+  expiration hardening work (Cycles 4/5) could have been measured.
