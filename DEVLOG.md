@@ -329,5 +329,19 @@ Recommendation's score moved from 10/10 (100%) in the very first harness run to 
 ### Bugs found and fixed
 The stale `actual_match` check (described above) is the only bug fixed in this pass. Everything else in the final numbers is either a genuine, already-documented hardening win (Receipt Parsing, Expiration — Cycles 4/5) or explained non-determinism (Recommendation, and part of Deduction's swing) — none of it required further code changes to reach a passing baseline.
 
+## PR #29 — README: add Why I built this, AI Engineering Highlights, Evaluation section, Engineering Challenges, and fix model selection table
+### What was built
+Six targeted additions/edits to `README.md`, no restructuring of existing content: a "Why I built this" section and an "AI Engineering Highlights" summary table, both inserted right after Overview; an "Evaluation" section (how the harness works, the before/after hardening table, how to run it) inserted before Roadmap; an "Engineering Challenges" table (five real failure/diagnosis/fix rows, drawn from DEVLOG history — the ivfflat bucket bug, the prose-prefixed JSON bug, the two-part Vercel/Railway 502 saga, and the deduction confidence-floor fix) inserted after Agent Pipeline; the Model Selection table's two "Expiration estimation (primary/fallback)" rows — which had described Sonnet as the primary model — collapsed into one accurate row (`Haiku (batch, known items) → Sonnet subagent (low-confidence escalation)`); and the Roadmap's "**Phase 2**" label renamed to "**Planned — Phase 2**" with an explicit "not yet implemented" note, so a reader skimming the roadmap doesn't mistake voice input or behavioral learning for shipped features.
+
+### Architectural decisions
+The Model Selection fix (Change 5) was a real documentation bug, not just a rewording: `api/agents/expiration.py` has always run Haiku (`HAIKU_MODEL`) for the batch call and only reaches Sonnet (`SUBAGENT_MODEL`) for the low-confidence escalation fallback — confirmed against the actual code before editing — but the table's "primary" row said Sonnet. Left every other row in that table untouched, since only this one was factually wrong.
+
+Verified every markdown table's column count (header vs. separator vs. every data row) and every fenced code block's open/close balance programmatically after all six edits, rather than eyeballing it — the file has three Mermaid diagrams and seven tables by the end of this PR, enough surface area that a single dropped pipe or fence would be easy to miss on a visual pass.
+
+Based this branch on `main` rather than any of the open/recently-merged eval branches, consistent with the pattern established in PR #28 — a docs-only change with no code dependency on in-flight branches shouldn't wait on them.
+
+### Bugs found and fixed
+The Model Selection table's stale "Expiration estimation (primary) | Sonnet" row (described above) — a documentation bug that has been in the README since before the eval-hardening arc, unrelated to any of the prompt or code changes in that arc, caught only because this PR's Change 5 asked to re-examine that specific row.
+
 ## How this log is maintained
 CLAUDE.md instructs Claude Code to update this file at the end of every PR before the final commit. Each entry documents what was built, architectural decisions and reasoning, and bugs found and fixed. Written for a technical interviewer reading the public repository.
