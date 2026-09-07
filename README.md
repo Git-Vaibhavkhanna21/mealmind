@@ -70,6 +70,22 @@ sequenceDiagram
     Frontend-->>User: updated pantry view
 ```
 
+## Why I built this
+
+MealMind started as a hands-on AI engineering project to explore where LLMs, agents, deterministic workflows, RAG, and tool interfaces should — and should not — be used in a production application. Every architectural decision in this codebase was made deliberately: workflow vs agent, Haiku vs Sonnet, MCP server vs direct tool call, pgvector RAG vs keyword search. The project is as much a study in AI system design as it is a functional product.
+
+## AI Engineering Highlights
+
+| Capability | Implementation |
+|---|---|
+| Agent architecture | Explicit workflow-vs-agent decision at each step — deterministic tasks use workflows, reasoning tasks use agents |
+| Model routing | Haiku for extraction and matching, Sonnet for recommendation and generation — with documented decision rules |
+| Tool use | MCP servers for pantry inventory and recipe database — centralised connection for shared resources |
+| RAG | pgvector cosine similarity retrieval of 10 candidates, followed by Sonnet ranking and selection |
+| Reliability | Confidence-based escalation from Haiku to Sonnet for ambiguous expiry estimation |
+| Evaluation | Rubric-based scoring, LLM-as-a-judge, regression testing, baseline established across 5 components |
+| Deployment | Next.js on Vercel, FastAPI microservice on Railway, Supabase with pgvector |
+
 ## Architecture
 
 ### Workflows vs. agents
@@ -99,8 +115,7 @@ Model choice follows task shape — volume and latency sensitivity on one axis, 
 | Step | Model tier | Why |
 |---|---|---|
 | Receipt parsing | Haiku | Runs once per receipt upload while the user is waiting; the extraction task is narrow and well-specified, so a fast, cheap model hits the accuracy bar without the latency cost of a larger one. |
-| Expiration estimation (primary) | Sonnet | Runs asynchronously in the background workflow, so latency matters less than judgment quality — estimating shelf life from limited context benefits from stronger reasoning. |
-| Expiration estimation (fallback) | Sonnet | Runs only for the items Haiku flags low-confidence on, so the extra reasoning cost is spent selectively rather than on every item. See below. |
+| Expiration estimation | Haiku (batch, known items) → Sonnet subagent (low-confidence escalation) | Deterministic for known items; reasoning required for ambiguous cases |
 | Meal recommendation | Sonnet (Opus as a future premium-tier option) | The highest-stakes reasoning step in the pipeline — synthesizes multiple RAG-retrieved candidates, pantry constraints, and (Phase 2) learned preferences into a ranked, explained recommendation. Runs once per session, so cost/latency headroom is available to spend on quality. |
 | Shopping list generation | Sonnet | Weighing pantry state, recent cook history, and preferences into ranked, justified suggestions is the same shape of open-ended reasoning as meal recommendation — runs once per (re)generation, not at high volume, so the latency/cost headroom is available. |
 
@@ -161,6 +176,18 @@ flowchart LR
 
 4. **Shopping list agent** (`api/agents/shopping_list.py`) — Reads current pantry state, the user's last 10 confirmed-cooked recipes (with ingredients), and their preferences, then asks Sonnet to suggest items that replenish what's running low, complement what's already on hand, or re-enable a dish cooked before — each with a one-sentence rationale. Regenerating replaces the unpurchased items from the previous list; anything already marked purchased is left alone as history.
 
+## Engineering Challenges
+
+Real problems encountered and resolved during the build:
+
+| Failure | Diagnosis | Fix |
+|---|---|---|
+| Recipe recommendations returning fabricated IDs | ivfflat index with lists=100 on 200-row table — probing near-empty buckets, Sonnet hallucinated IDs with empty context | Forced near-exhaustive probing inside match_recipes RPC; documented in DEVLOG |
+| Meal recommendation agent failing intermittently | Sonnet prefacing JSON response with prose, breaking json.loads() | _extract_json_list() scans for first [ and last ] regardless of surrounding text |
+| All agent endpoints returning 502 in production | Python subprocesses do not work on Vercel serverless runtime — no Python installed in ephemeral functions | Wrapped all Python agents in FastAPI microservice deployed on Railway |
+| 502 errors persisting after Railway deployment | PYTHON_API_URL stored without https:// prefix — fetch() threw on invalid URL, caught and swallowed by generic error handler | Added /api/health endpoint to verify environment variables; fixed prefix in Vercel dashboard |
+| Pantry deduction creating false positive matches | No confidence floor — model returning 0.35 confidence for spring onion matched to red onion, code ignoring the signal | CONFIDENCE_FLOOR = 0.75 in build_deduction_plan; defensive guard in apply_deduction for null pantry_item_id |
+
 ## Database Schema
 
 Five tables, all in Supabase Postgres:
@@ -189,11 +216,43 @@ See [`DEPLOYMENT.md`](DEPLOYMENT.md) for deploying this same setup to Vercel and
 
 The Next.js frontend deploys to Vercel from the `frontend/` directory; see [`DEPLOYMENT.md`](DEPLOYMENT.md) for the full setup — Vercel project configuration, required environment variables, Supabase production settings, and how the Python agents run alongside the deployed frontend.
 
+## Evaluation
+
+MealMind includes a formal evaluation harness in `eval/` that measures AI output quality across all five agent components using task-specific rubrics, LLM-as-a-judge scoring, and regression testing against a stored baseline.
+
+### How it works
+
+Each component has a fixture file with test cases and expected outputs. Qualitative components (meal recommendation, shopping list) are scored by Claude Sonnet acting as a judge, using a 0–2 rubric per criterion normalised to 0–100. Deterministic components (receipt parsing, expiration, deduction) use exact and fuzzy matching. The regression runner compares each run against `eval/results/baseline.json` and flags any component that drops more than 5 percentage points.
+
+### Before and after hardening
+
+Three hardening cycles improved the two weakest components significantly:
+
+| Component | Before hardening | After hardening | Delta |
+|---|---|---|---|
+| Receipt Parsing | 13% | 87% | +74pp |
+| Expiration | 50% | 77% | +27pp |
+| Recommendation | 100% | 90% | −10pp (LLM judge variance) |
+| Deduction | 79% | 93% | +14pp |
+| Shopping List | 80% | 100% | +20pp |
+
+The harness surfaced two production bugs: a missing confidence floor in the pantry deduction agent (causing false positive ingredient matches in the live app) and a stale evaluation check that masked deduction failures. Both were fixed before the baseline was established.
+
+To run the evaluation suite:
+```bash
+cd ~/mealmind
+python3 eval/harness.py
+python3 eval/report.py
+```
+
 ## Roadmap
 
 **Phase 1 — current**
 Core pipeline described above: receipt parsing, pantry tracking with expiration estimation, RAG-based meal recommendations, shopping list generation, and the Next.js frontend (`/pantry`, `/recipes`, `/shopping-list`, `/settings`).
 
-**Phase 2**
+**Planned — Phase 2**
+
+The following capabilities are planned and not yet implemented.
+
 - **Voice input** — add pantry items or query recommendations by voice instead of receipt upload or manual entry.
 - **Behavioral learning** — feed accepted/rejected recommendations back into the meal recommendation agent so ranking adapts to individual taste over time, rather than relying solely on static dietary settings.
