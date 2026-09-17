@@ -11,11 +11,10 @@ export type Recipe = {
   pantry_items_used: string[];
   prep_time_minutes: number;
   reason: string;
-  // Not yet populated end-to-end (see DEVLOG) — the recipes table and the
-  // meal_recommender selection step don't carry TheMealDB's strMealThumb
-  // through today, so this is always undefined until that's wired up. The
-  // placeholder gradient below is the real-world default, not just a
-  // theoretical fallback.
+  // null for recipes seeded before migrations/0003_add_thumbnail_url.sql
+  // and database/backfill_thumbnails.py have been run against this
+  // environment's Supabase project — see DEVLOG. The placeholder gradient
+  // below covers that case as well as TheMealDB entries with no photo.
   thumbnail?: string | null;
 };
 

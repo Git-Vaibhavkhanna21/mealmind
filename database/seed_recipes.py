@@ -135,6 +135,7 @@ def upsert_recipes(
             "instructions": recipe["instructions"],
             "cuisine": recipe["cuisine"],
             "prep_time": recipe["prep_time"],
+            "thumbnail_url": recipe["thumbnail"],
             "embedding": to_pgvector_literal(embedding),
         }
         for recipe, embedding in zip(recipes, embeddings)

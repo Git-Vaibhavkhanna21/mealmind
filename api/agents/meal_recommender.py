@@ -222,6 +222,19 @@ def _select_recipes(
     return _extract_json_list(response_text)
 
 
+def _attach_thumbnails(
+    recipes: list[dict[str, Any]], candidates: list[dict[str, Any]]
+) -> list[dict[str, Any]]:
+    """Sonnet only echoes back the fields _SELECTION_INSTRUCTIONS asks for
+    (no thumbnail_url — there's no reason to spend tokens having it retype a
+    URL), so the photo has to be joined back in from the candidate it was
+    selected from, keyed on the same "id" that became "recipe_id"."""
+    thumbnails_by_id = {c["id"]: c.get("thumbnail_url") for c in candidates}
+    for recipe in recipes:
+        recipe["thumbnail"] = thumbnails_by_id.get(recipe.get("recipe_id"))
+    return recipes
+
+
 def _save_history(user_id: str, recipe_ids: list[str]) -> None:
     if not recipe_ids:
         return
@@ -241,6 +254,7 @@ def recommend(user_id: str) -> list[dict[str, Any]]:
     recipes = _select_recipes(
         pantry_items, preferences, candidates, count_instruction="Select exactly 3 recipes."
     )
+    recipes = _attach_thumbnails(recipes, candidates)
     _save_history(user_id, [r["recipe_id"] for r in recipes if r.get("recipe_id")])
     return recipes
 
@@ -259,6 +273,7 @@ def generate_custom_recipe(user_id: str, request_text: str) -> list[dict[str, An
         count_instruction=_CUSTOM_COUNT_INSTRUCTION,
         request_text=request_text,
     )
+    recipes = _attach_thumbnails(recipes, candidates)
     _save_history(user_id, [r["recipe_id"] for r in recipes if r.get("recipe_id")])
     return recipes
 
