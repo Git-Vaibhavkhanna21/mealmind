@@ -1,6 +1,24 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { RecipesClient } from "@/components/recipes-client";
+import { RecipesClient, type Recipe } from "@/components/recipes-client";
+import { callPythonApi, parsePythonApiResponse, PythonApiError } from "@/lib/python-api";
+
+async function fetchInitialRecipes(userId: string): Promise<Recipe[]> {
+  try {
+    const response = await callPythonApi("/recommend", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ user_id: userId }),
+    });
+    const result = await parsePythonApiResponse<{ recipes: Recipe[] }>(response);
+    return result.recipes;
+  } catch (error) {
+    if (!(error instanceof PythonApiError)) {
+      console.error("Failed to fetch initial recipes:", error);
+    }
+    return [];
+  }
+}
 
 export default async function RecipesPage() {
   const supabase = await createClient();
@@ -12,15 +30,11 @@ export default async function RecipesPage() {
     redirect("/");
   }
 
+  const initialRecipes = await fetchInitialRecipes(user.id);
+
   return (
-    <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-8 p-8 sm:p-16">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Recipes</h1>
-        <p className="mt-1 text-zinc-600 dark:text-zinc-400">
-          Recommendations based on what&apos;s in your pantry right now.
-        </p>
-      </div>
-      <RecipesClient />
+    <main className="flex min-h-screen flex-1 flex-col gap-6 bg-bg px-4 pt-8">
+      <RecipesClient initialRecipes={initialRecipes} />
     </main>
   );
 }

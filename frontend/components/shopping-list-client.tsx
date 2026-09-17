@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Check } from "lucide-react";
 
 type ShoppingListItem = {
   id: string;
@@ -58,57 +59,124 @@ export function ShoppingListClient({ initialItems }: { initialItems: ShoppingLis
     }
   }
 
-  const sortedItems = [...items].sort((a, b) => Number(a.purchased) - Number(b.purchased));
-  const toBuyCount = items.filter((item) => !item.purchased).length;
+  const unpurchased = items.filter((item) => !item.purchased);
+  const purchased = items.filter((item) => item.purchased);
+  const remainingCount = unpurchased.length;
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-1 flex-col gap-6 pb-6">
       <div className="flex items-center justify-between">
-        <p className="text-sm text-zinc-600 dark:text-zinc-400">
-          {toBuyCount} item{toBuyCount === 1 ? "" : "s"} to buy
-        </p>
+        <div>
+          <h1 className="font-display text-[28px] text-text">Shopping List</h1>
+          <p className="mt-1 text-[13px] text-muted">
+            {remainingCount === 0
+              ? "All done!"
+              : `${remainingCount} item${remainingCount === 1 ? "" : "s"} remaining`}
+          </p>
+        </div>
         <button
           type="button"
           onClick={handleRegenerate}
           disabled={isRegenerating}
-          className="rounded-full bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-zinc-700 disabled:pointer-events-none disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
+          className="rounded-[20px] border border-amber bg-white px-4 py-1.5 text-[13px] text-amber transition disabled:pointer-events-none disabled:opacity-50"
         >
           {isRegenerating ? "Regenerating…" : "Regenerate"}
         </button>
       </div>
 
-      {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
+      {error && <p className="text-sm text-urgent">{error}</p>}
 
-      {sortedItems.length === 0 ? (
-        <p className="text-sm text-zinc-600 dark:text-zinc-400">
-          No items yet — click Regenerate to build a list from your pantry and cooking history.
-        </p>
+      {items.length === 0 ? (
+        <div className="flex flex-1 flex-col items-center justify-center gap-3 py-16 text-center">
+          <h2 className="font-display text-2xl text-text">Your list is empty</h2>
+          <p className="text-sm text-muted">
+            Generate a shopping list based on your pantry and cooking history
+          </p>
+          <button
+            type="button"
+            onClick={handleRegenerate}
+            disabled={isRegenerating}
+            className="mt-2 rounded-[var(--radius)] bg-amber px-6 py-3 text-sm font-semibold text-white transition hover:opacity-90 disabled:pointer-events-none disabled:opacity-50"
+          >
+            {isRegenerating ? "Generating…" : "Generate List"}
+          </button>
+        </div>
       ) : (
-        <ul className="flex flex-col divide-y divide-zinc-200 dark:divide-zinc-800">
-          {sortedItems.map((item) => (
-            <li key={item.id} className="flex items-start gap-3 py-3">
-              <input
-                type="checkbox"
-                checked={item.purchased}
-                disabled={togglingId === item.id}
-                onChange={() => handleTogglePurchased(item)}
-                className="mt-1"
-              />
-              <div className={item.purchased ? "opacity-50" : undefined}>
-                <p className={`font-medium capitalize ${item.purchased ? "line-through" : ""}`}>
-                  {item.name}
-                </p>
-                <p className="text-sm text-zinc-600 dark:text-zinc-400">
-                  {[item.quantity, item.unit].filter(Boolean).join(" ") || "—"}
-                </p>
-                {item.rationale && (
-                  <p className="text-sm text-zinc-500 dark:text-zinc-500">{item.rationale}</p>
-                )}
-              </div>
-            </li>
+        <div className="flex flex-col gap-2">
+          {unpurchased.map((item) => (
+            <ShoppingListItemCard
+              key={item.id}
+              item={item}
+              isToggling={togglingId === item.id}
+              onToggle={() => handleTogglePurchased(item)}
+            />
           ))}
-        </ul>
+
+          {purchased.length > 0 && (
+            <>
+              <div className="relative flex items-center py-1">
+                <div className="h-px flex-1 bg-border" />
+                <span className="px-3 text-[11px] uppercase tracking-wide text-muted">Purchased</span>
+                <div className="h-px flex-1 bg-border" />
+              </div>
+              {purchased.map((item) => (
+                <ShoppingListItemCard
+                  key={item.id}
+                  item={item}
+                  isToggling={togglingId === item.id}
+                  onToggle={() => handleTogglePurchased(item)}
+                />
+              ))}
+            </>
+          )}
+        </div>
       )}
+    </div>
+  );
+}
+
+function ShoppingListItemCard({
+  item,
+  isToggling,
+  onToggle,
+}: {
+  item: ShoppingListItem;
+  isToggling: boolean;
+  onToggle: () => void;
+}) {
+  return (
+    <div
+      className={`flex items-center gap-3 rounded-[var(--radius-sm)] border border-border p-[14px_16px] transition ${
+        item.purchased ? "bg-bg" : "bg-surface"
+      }`}
+    >
+      <div className="flex-1">
+        <p
+          className={`text-sm font-medium ${
+            item.purchased ? "text-muted line-through" : "text-text"
+          }`}
+        >
+          {item.name}
+        </p>
+        <p className="mt-0.5 text-xs text-muted">
+          {[item.quantity, item.unit].filter(Boolean).join(" ") || "—"}
+        </p>
+        {item.rationale && (
+          <p className="mt-0.5 text-xs italic text-text-mid">{item.rationale}</p>
+        )}
+      </div>
+      <button
+        type="button"
+        onClick={onToggle}
+        disabled={isToggling}
+        aria-label={item.purchased ? "Mark as not purchased" : "Mark as purchased"}
+        aria-pressed={item.purchased}
+        className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 transition disabled:pointer-events-none disabled:opacity-50 ${
+          item.purchased ? "border-amber bg-amber" : "border-border bg-transparent"
+        }`}
+      >
+        {item.purchased && <Check size={14} className="text-white" strokeWidth={3} />}
+      </button>
     </div>
   );
 }

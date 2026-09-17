@@ -20,13 +20,7 @@ export default async function ShoppingListPage() {
     .order("added_at", { ascending: false });
 
   return (
-    <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-8 p-8 sm:p-16">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Shopping List</h1>
-        <p className="mt-1 text-zinc-600 dark:text-zinc-400">
-          Suggested based on your pantry, cooking history, and preferences.
-        </p>
-      </div>
+    <main className="flex min-h-screen flex-1 flex-col gap-6 bg-bg px-4 pt-8">
       <ShoppingListClient initialItems={items ?? []} />
     </main>
   );
