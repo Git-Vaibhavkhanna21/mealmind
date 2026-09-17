@@ -1,14 +1,22 @@
 "use client";
 
+import Link from "next/link";
 import { useState, type FormEvent } from "react";
+import { ArrowRight, Clock } from "lucide-react";
 
-type Recipe = {
+export type Recipe = {
   recipe_id: string;
   title: string;
   ingredients: string[];
   pantry_items_used: string[];
   prep_time_minutes: number;
   reason: string;
+  // Not yet populated end-to-end (see DEVLOG) — the recipes table and the
+  // meal_recommender selection step don't carry TheMealDB's strMealThumb
+  // through today, so this is always undefined until that's wired up. The
+  // placeholder gradient below is the real-world default, not just a
+  // theoretical fallback.
+  thumbnail?: string | null;
 };
 
 type DeductionItem = {
@@ -21,14 +29,8 @@ type DeductionItem = {
 
 const LOW_CONFIDENCE_THRESHOLD = 0.7;
 
-function isPantryIngredient(ingredient: string, pantryItemsUsed: string[]): boolean {
-  const lower = ingredient.toLowerCase();
-  return pantryItemsUsed.some((used) => lower.includes(used.toLowerCase()));
-}
-
-export function RecipesClient() {
-  const [recipes, setRecipes] = useState<Recipe[]>([]);
-  const [hasLoaded, setHasLoaded] = useState(false);
+export function RecipesClient({ initialRecipes }: { initialRecipes: Recipe[] }) {
+  const [recipes, setRecipes] = useState<Recipe[]>(initialRecipes);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [customRequest, setCustomRequest] = useState("");
@@ -56,7 +58,6 @@ export function RecipesClient() {
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to get recommendations");
     } finally {
-      setHasLoaded(true);
       setIsLoading(false);
     }
   }
@@ -64,7 +65,9 @@ export function RecipesClient() {
   async function handleCustomSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!customRequest.trim()) return;
-    await fetchRecipes(customRequest.trim());
+    const request = customRequest.trim();
+    setCustomRequest("");
+    await fetchRecipes(request);
   }
 
   async function handleCookThis(recipe: Recipe) {
@@ -123,131 +126,98 @@ export function RecipesClient() {
   }
 
   return (
-    <div className="flex flex-col gap-8">
-      {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
+    <div className="flex flex-1 flex-col gap-6 pb-6">
+      <div className="flex items-center justify-between">
+        <h1 className="font-display text-[28px] text-text">Recipes</h1>
+        <button
+          type="button"
+          onClick={() => fetchRecipes()}
+          disabled={isLoading}
+          className="rounded-[20px] border border-amber bg-white px-4 py-1.5 text-[13px] text-amber transition disabled:pointer-events-none disabled:opacity-50"
+        >
+          {isLoading ? "Regenerating…" : "Regenerate"}
+        </button>
+      </div>
+
+      <form
+        onSubmit={handleCustomSubmit}
+        className="flex h-12 items-center gap-1.5 rounded-[var(--radius)] border border-border bg-surface pr-1.5 pl-4 focus-within:outline focus-within:outline-2 focus-within:outline-amber"
+      >
+        <input
+          type="text"
+          value={customRequest}
+          onChange={(event) => setCustomRequest(event.target.value)}
+          placeholder="What are you in the mood for?"
+          disabled={isLoading}
+          className="h-full flex-1 bg-transparent text-sm text-text outline-none placeholder:text-muted"
+        />
+        <button
+          type="submit"
+          disabled={isLoading || !customRequest.trim()}
+          aria-label="Get recipe"
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-amber text-white transition disabled:pointer-events-none disabled:opacity-50"
+        >
+          <ArrowRight size={16} />
+        </button>
+      </form>
+
+      {error && <p className="text-sm text-urgent">{error}</p>}
 
       {isLoading ? (
-        <p className="text-sm text-zinc-600 dark:text-zinc-400">Finding recipes…</p>
-      ) : !hasLoaded ? (
-        <div className="flex flex-col items-start gap-3">
-          <p className="text-sm text-zinc-600 dark:text-zinc-400">
-            Get 3 recipes based on what&apos;s in your pantry right now, prioritizing
-            items closest to expiring.
-          </p>
-          <button
-            type="button"
-            onClick={() => fetchRecipes()}
-            className="rounded-full bg-zinc-900 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-zinc-700 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
-          >
-            Get recommendations
-          </button>
-        </div>
+        <p className="text-sm text-muted">Finding recipes…</p>
       ) : recipes.length === 0 ? (
-        <p className="text-sm text-zinc-600 dark:text-zinc-400">
-          No recommendations yet — add items to your pantry first.
-        </p>
+        <div className="flex flex-1 flex-col items-center justify-center gap-3 py-16 text-center">
+          <h2 className="font-display text-2xl text-text">Nothing here yet</h2>
+          <p className="text-sm text-muted">
+            Add groceries to your pantry and we will find recipes for you
+          </p>
+          <Link
+            href="/pantry"
+            className="mt-2 rounded-[var(--radius)] bg-amber px-6 py-3 text-sm font-semibold text-white transition hover:opacity-90"
+          >
+            Go to Pantry
+          </Link>
+        </div>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="flex flex-col gap-4">
           {recipes.map((recipe) => (
-            <article
-              key={recipe.recipe_id}
-              className="flex flex-col gap-3 rounded-xl border border-zinc-200 p-5 dark:border-zinc-800"
-            >
-              <h3 className="font-medium">{recipe.title}</h3>
-              <p className="text-sm text-zinc-500 dark:text-zinc-500">
-                ~{recipe.prep_time_minutes} min
-              </p>
-              <ul className="flex flex-wrap gap-1.5 text-sm">
-                {recipe.ingredients.map((ingredient, index) => (
-                  <li
-                    key={index}
-                    className={
-                      isPantryIngredient(ingredient, recipe.pantry_items_used)
-                        ? "rounded-full bg-green-100 px-2 py-0.5 text-green-800 dark:bg-green-900/40 dark:text-green-300"
-                        : "rounded-full bg-zinc-100 px-2 py-0.5 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300"
-                    }
-                  >
-                    {ingredient}
-                  </li>
-                ))}
-              </ul>
-              <p className="text-sm text-zinc-600 dark:text-zinc-400">{recipe.reason}</p>
-              <button
-                type="button"
-                onClick={() => handleCookThis(recipe)}
-                className="mt-1 self-start rounded-full bg-zinc-900 px-4 py-1.5 text-sm font-medium text-white transition hover:bg-zinc-700 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
-              >
-                Cook This
-              </button>
-            </article>
+            <RecipeCard key={recipe.recipe_id} recipe={recipe} onCookThis={() => handleCookThis(recipe)} />
           ))}
         </div>
       )}
 
-      <form
-        onSubmit={handleCustomSubmit}
-        className="flex flex-col gap-3 rounded-xl border border-zinc-200 p-6 dark:border-zinc-800"
-      >
-        <div>
-          <h2 className="font-medium">Want something specific?</h2>
-          <p className="text-sm text-zinc-600 dark:text-zinc-400">
-            e.g. &ldquo;I want to use up the spinach&rdquo; or &ldquo;I feel like pasta
-            tonight&rdquo;
-          </p>
-        </div>
-        <div className="flex gap-3">
-          <input
-            type="text"
-            value={customRequest}
-            onChange={(event) => setCustomRequest(event.target.value)}
-            placeholder="I feel like pasta tonight"
-            disabled={isLoading}
-            className="flex-1 rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none focus:border-zinc-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
-          />
-          <button
-            type="submit"
-            disabled={isLoading || !customRequest.trim()}
-            className="rounded-full bg-zinc-900 px-5 py-2 text-sm font-medium text-white transition hover:bg-zinc-700 disabled:pointer-events-none disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
-          >
-            {isLoading ? "Thinking…" : "Ask"}
-          </button>
-        </div>
-      </form>
-
       {cookingRecipe && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="flex w-full max-w-md flex-col gap-4 rounded-xl bg-white p-6 dark:bg-zinc-900">
+          <div className="flex w-full max-w-md flex-col gap-4 rounded-[var(--radius)] bg-surface p-6">
             <div>
-              <h2 className="font-medium">Cook &ldquo;{cookingRecipe.title}&rdquo;?</h2>
-              <p className="text-sm text-zinc-600 dark:text-zinc-400">
-                Review what will be deducted from your pantry.
-              </p>
+              <h2 className="font-display text-lg text-text">Cook &ldquo;{cookingRecipe.title}&rdquo;?</h2>
+              <p className="text-sm text-muted">Review what will be deducted from your pantry.</p>
             </div>
 
             {isBuildingPlan ? (
-              <p className="text-sm text-zinc-600 dark:text-zinc-400">Checking your pantry…</p>
+              <p className="text-sm text-muted">Checking your pantry…</p>
             ) : deductionPlan && deductionPlan.length === 0 ? (
-              <p className="text-sm text-zinc-600 dark:text-zinc-400">
+              <p className="text-sm text-muted">
                 No pantry items matched closely enough to deduct automatically.
               </p>
             ) : deductionPlan ? (
-              <ul className="flex flex-col divide-y divide-zinc-200 dark:divide-zinc-800">
+              <ul className="flex flex-col divide-y divide-border">
                 {deductionPlan.map((entry) => (
                   <li
                     key={entry.pantry_item_id}
                     className="flex items-center justify-between gap-3 py-2 text-sm"
                   >
                     <div>
-                      <p className="font-medium capitalize">{entry.pantry_item_name}</p>
-                      <p className="text-zinc-600 dark:text-zinc-400">
+                      <p className="font-medium capitalize text-text">{entry.pantry_item_name}</p>
+                      <p className="text-muted">
                         -{entry.quantity_to_deduct} {entry.unit}
                       </p>
                     </div>
                     <span
                       className={
                         entry.confidence < LOW_CONFIDENCE_THRESHOLD
-                          ? "rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800 dark:bg-amber-900/40 dark:text-amber-300"
-                          : "rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800 dark:bg-green-900/40 dark:text-green-300"
+                          ? "rounded-full bg-warning-light px-2 py-0.5 text-xs font-medium text-warning"
+                          : "rounded-full bg-green-light px-2 py-0.5 text-xs font-medium text-green"
                       }
                     >
                       {Math.round(entry.confidence * 100)}% match
@@ -257,14 +227,14 @@ export function RecipesClient() {
               </ul>
             ) : null}
 
-            {cookError && <p className="text-sm text-red-600 dark:text-red-400">{cookError}</p>}
+            {cookError && <p className="text-sm text-urgent">{cookError}</p>}
 
             <div className="flex justify-end gap-3">
               <button
                 type="button"
                 onClick={closeCookModal}
                 disabled={isConfirmingCook}
-                className="rounded-full border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-900 transition hover:bg-zinc-50 disabled:pointer-events-none disabled:opacity-50 dark:border-zinc-700 dark:text-zinc-100 dark:hover:bg-zinc-800"
+                className="rounded-full border border-border px-4 py-2 text-sm font-medium text-text transition disabled:pointer-events-none disabled:opacity-50"
               >
                 Cancel
               </button>
@@ -272,7 +242,7 @@ export function RecipesClient() {
                 type="button"
                 onClick={handleConfirmCook}
                 disabled={isBuildingPlan || isConfirmingCook || !deductionPlan}
-                className="rounded-full bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-zinc-700 disabled:pointer-events-none disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
+                className="rounded-full bg-amber px-4 py-2 text-sm font-medium text-white transition disabled:pointer-events-none disabled:opacity-50"
               >
                 {isConfirmingCook ? "Confirming…" : "Confirm Cook"}
               </button>
@@ -281,5 +251,65 @@ export function RecipesClient() {
         </div>
       )}
     </div>
+  );
+}
+
+function RecipeCard({ recipe, onCookThis }: { recipe: Recipe; onCookThis: () => void }) {
+  return (
+    <article
+      className="w-full overflow-hidden rounded-[var(--radius)] bg-surface"
+      style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.08)" }}
+    >
+      {recipe.thumbnail ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={recipe.thumbnail}
+          alt={recipe.title}
+          className="h-[180px] w-full rounded-t-[var(--radius)] object-cover"
+        />
+      ) : (
+        <div
+          className="h-[180px] w-full rounded-t-[var(--radius)]"
+          style={{ background: "linear-gradient(135deg, var(--amber-muted), var(--amber-light))" }}
+        />
+      )}
+
+      <div className="p-4">
+        <h3 className="line-clamp-2 font-display text-[18px] font-semibold text-text">
+          {recipe.title}
+        </h3>
+
+        {recipe.pantry_items_used.length > 0 && (
+          <div className="mt-3">
+            <p className="text-[11px] uppercase tracking-wide text-muted">Uses from your pantry:</p>
+            <div className="mt-1.5 flex flex-wrap gap-1.5">
+              {recipe.pantry_items_used.map((item) => (
+                <span
+                  key={item}
+                  className="rounded-[20px] bg-amber-light px-2 py-0.5 text-[11px] text-amber"
+                >
+                  {item}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div className="mt-2 flex items-center gap-1">
+          <Clock size={14} className="text-muted" />
+          <span className="text-[12px] text-muted">{recipe.prep_time_minutes} min</span>
+        </div>
+
+        <p className="mt-2 line-clamp-2 text-[13px] italic text-text-mid">{recipe.reason}</p>
+
+        <button
+          type="button"
+          onClick={onCookThis}
+          className="mt-3 h-11 w-full rounded-[var(--radius-sm)] bg-amber text-sm font-semibold text-white transition hover:opacity-90"
+        >
+          Cook This
+        </button>
+      </div>
+    </article>
   );
 }
